@@ -1,0 +1,96 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/customer") Customer
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header Customer Entry
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='code') ID
+        div.col-sm-5.label-data
+          input.form-control#code.mm(type='text', name='code', value=params.code, maxlength="55", readonly)
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='customer_name') ဝယ်သူအမည် 
+        div.col-sm-5.label-data
+          input.form-control#customer_name.mm(type='text', name='customer_name', value=params.customer_name, maxlength="55", required autofocus)
+        //- div.col-sm-2.label-data
+        //-   label.control-label(for='customer_dob') D.O.B
+        //- div.col-sm-2.label-data
+        //-   input.form-control#customer_dob.mm(type='text', name='customer_dob', value=params.customer_dob, maxlength="55", required autofocus)
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='phone') ဖုန်း
+        div.col-sm-5.label-data
+          input.form-control#phone.mm(type='number', name='phone', value=params.phone, maxlength="55", required autofocus)  
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='address') လိပ်စာ
+        div.col-sm-10.label-data
+          textarea.form-control.mm#address(name='address')= params.address
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-customer').addClass('active');
+      $('div#setup_subitems').addClass('show');
+      //- $("#customer_dob").datepicker({
+      //-   format: "dd/M/yyyy",
+      //-   autoclose: true,
+      //-   todayHighlight: true,
+      //-   orientation: 'bottom'
+      //- });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

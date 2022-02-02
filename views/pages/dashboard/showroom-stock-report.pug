@@ -1,0 +1,147 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span Showroom လက်ကျန်ပစ္စည်း
+  h1.page-header Showroom လက်ကျန်ပစ္စည်း
+
+  form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+    div.form-group.row
+        label.col-sm-2.control-label(for='startdate') From Date
+        div.col-sm-10
+          input.form-control.fromdate#start.mm(type='text', name='start', required)
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='enddate') To Date
+      div.col-sm-10
+        input.form-control.todate#end.mm(type='text', name='end', required)
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='type') Type
+      div.col-sm-10
+        select#type.selectpicker.form-control(name='type', data-live-search="false", data-size="20", required)
+          option(value="category") Category
+          option(value="grade") Grade
+          option(value="type") Type
+          option(value="gold_rate") Gold Rate
+
+    div.row.justify-content-center.form-actions
+      button.btn.btn-primary#loadBtn(type='button', role='button') Load
+      
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          //- th #
+          th Particular
+          th Count
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-showroom-stock-report').addClass('active');
+      $('div#report_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+
+      let current = new Date();
+      let month = current.getMonth() + 1;
+      const year = current.getFullYear();
+      let day = current.getDate();
+      if (month < 10)
+        month = "0" + month;
+      if (day < 10)
+        day = "0" + day;
+
+      const showcurrent = day + "/" + month + "/" + year;
+      const showstart = "01/" + month + "/" + year;
+      $("#start").val(showstart);
+      $("#end").val(showcurrent);
+      const type = $("#type").val();
+      reload(showstart, showcurrent, type);
+
+      $("#loadBtn").on('click', function(event){
+        reload($("#start").val(), $("#end").val(), $("#type").val());
+      });
+
+      function reload(start, end, type) {
+        var table = $('table#list').DataTable({
+          destroy: true,
+          autoWidth: true,
+          ajax: { 
+            "url": "/api/reportview/getShowroomStockReport?start="+start+"&end="+end+"&type="+type,
+            "type": "GET",
+            "headers": {"authorization": "Bearer " + token}
+          },
+          columns: [
+            { "data": "name" },
+            { "data": "count" }
+          ],
+          columnDefs: [
+          ],
+          lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+          dom:  "<'row'<'col-sm-12 col-md-12 mb-1'B>>" +
+                "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+          buttons: [
+            {
+              extend: 'excel',
+              text: 'Excel',
+              charset: 'utf-8',
+              className: 'success-excel',
+              filename: 'Showroom လက်ကျန်ပစ္စည်း Report',
+              exportOptions: {
+                columns: [ 0, 1 ]
+              },
+              title: 'Showroom လက်ကျန်ပစ္စည်း Report',
+            }
+          ]
+        });
+        return table;
+      }
+
+      //- var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+      //-     console.log('DataTables Error: ', message);
+      //-     alert('Read data error!');
+      //-   }).DataTable({
+      //-     "autoWidth": true,
+      //-     "ajax": { 
+      //-       "url": "/api/reportview/getShowroomStockReport?start="+start+"&end="+end,
+      //-       "type": "GET",
+      //-       "headers": {"authorization": "Bearer " + token}
+      //-     },
+      //-     "columns": [
+      //-         { "data": "name" },
+      //-         { "data": "count" }
+      //-     ],
+      //-     "columnDefs": [
+      //-       //- { targets: 0, render: dataTableIndexRenderer() },
+      //-     ],
+      //-     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+      //-     dom:  "<'row'<'col-sm-12 col-md-12 mb-1'B>>" +
+      //-           "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
+      //-           "<'row'<'col-sm-12'tr>>" +
+      //-           "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      //-     buttons: [
+      //-       {
+      //-         extend: 'excel',
+      //-         text: 'Excel',
+      //-         charset: 'utf-8',
+      //-         className: 'success-excel',
+      //-         filename: 'Showroom လက်ကျန်ပစ္စည်း Report',
+      //-         exportOptions: {
+      //-           columns: [ 0, 1 ]
+      //-         },
+      //-         title: 'Showroom လက်ကျန်ပစ္စည်း Report',
+      //-       }
+      //-     ]
+      //- });
+
+    });

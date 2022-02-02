@@ -1,0 +1,120 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/goldrate-price") ကာလပေါက်ဈေး
+    li.breadcrumb-item.active
+      span စာရင်းသွင်း
+  h1.page-header ကာလပေါက်ဈေး
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      //- input#a_setting(type='hidden', name='a_setting', value=goldratesetting.a_setting)
+      //- input#b_setting(type='hidden', name='b_setting', value=goldratesetting.b_setting)
+      //- input#c_setting(type='hidden', name='c_setting', value=goldratesetting.c_setting)
+      //- input#d_setting(type='hidden', name='d_setting', value=goldratesetting.d_setting)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='diamond') စိန်စျေး
+        div.col-sm-10
+          input.form-control#diamond.mm(type='number', name='diamond', value=params.diamond, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='platinum') ပလက်တီနမ်စျေး
+        div.col-sm-10
+          input.form-control#platinum.mm(type='number', name='platinum', value=params.platinum, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='a') ၁၆ပဲရည်
+        div.col-sm-10
+          input.form-control#a.mm(type='number', name='a', value=params.a, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='b') ၁၅ပဲရည်
+        div.col-sm-10
+          input.form-control#b.mm(type='number', name='b', value=params.b, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='c') ၁၄ပဲရည်
+        div.col-sm-10
+          input.form-control#c.mm(type='number', name='c', value=params.c, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='d') ၁၃ပဲရည်
+        div.col-sm-10
+          input.form-control#d.mm(type='number', name='d', value=params.d, maxlength="55", required autofocus)
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-goldrate-price').addClass('active');
+      $('div#setup_subitems').addClass('show');
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });
+  //- script.
+    //- $("#s").change(function() {
+    //-   console.log("s change");
+    //-   $a_setting = parseFloat($("#a_setting").val());
+    //-   $b_setting = parseFloat($("#b_setting").val());
+    //-   $c_setting = parseFloat($("#c_setting").val());
+    //-   $d_setting = parseFloat($("#d_setting").val());
+
+    //-   $s_price = parseFloat($("#s").val());
+    //-   $a_price = (($s_price*16)/$a_setting).toFixed(0);
+    //-   $b_price = (($s_price*16)/$b_setting).toFixed(0);
+    //-   $c_price = (($s_price*16)/$c_setting).toFixed(0);
+    //-   $d_price = (($s_price*16)/$d_setting).toFixed(0);
+
+    //-   $("#a").val($a_price);
+    //-   $("#b").val($b_price);
+    //-   $("#c").val($c_price);
+    //-   $("#d").val($d_price);
+    //- });
+
+    //- script(src='/js/script.js')

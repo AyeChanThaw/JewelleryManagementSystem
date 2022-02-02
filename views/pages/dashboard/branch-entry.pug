@@ -1,0 +1,107 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/branch") Branch
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header Branch Entry
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+
+      div.text-right#code-name
+      div.form-group.row
+        label.col-sm-2.control-label(for='branch_code') Code
+        div.col-sm-10
+          input.form-control#branch_code.mm(type='text', name='branch_code', value=params.branch_code, maxlength="55", required autofocus)
+      
+      div.form-group.row
+        label.col-sm-2.control-label(for='branch_name') Branch
+        div.col-sm-10
+          input.form-control#branch_name.mm(type='text', name='branch_name', value=params.branch_name, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='address') Address
+        div.col-sm-10
+          textarea.form-control.mm#address(name='address')= params.address
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var submit = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-item').addClass('active');
+      $('div#setup_subitems').addClass('show');
+
+      $("#submitBtn").click(function() {
+        //- $("#submitBtn").setAttribute("disabled", "");
+        submit = 1;
+      });
+
+      $("#alert").hide();
+      $("#code-name").hide();
+      $("#branch_code").on('change keyup',function(){
+        $("#branch_code").val(($("#branch_code").val()).toUpperCase());
+
+        var recordid = $("#recordid").val();
+        var code = $("#branch_code").val();
+        if (submit == 0) {
+          $.ajax({
+            url: "/api/checkduplicate/checkBranchCode?code=" + code + "&recordid=" + recordid,  
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              if (result == true) {
+                $("#code-name").html("Already Exist!").addClass('text-danger').show();
+                submitBtn.setAttribute("disabled", "");
+              } else {
+                $("#code-name").hide();
+                submitBtn.removeAttribute("disabled");
+              }
+            }
+          });
+        }
+      });
+
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

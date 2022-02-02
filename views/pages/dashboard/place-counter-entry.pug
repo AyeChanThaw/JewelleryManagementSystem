@@ -1,0 +1,99 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/polish-finish") Place Counter
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm Place Counter
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#count(type='hidden', name='count', value=params.count)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='code') Code
+        div.col-sm-10
+            input.form-control.model-stock-code#code(type='text', name='code', value=params.code, maxlength="55", readonly)
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      var type = "";
+      var category = "";
+      var count = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-polish').addClass('active');
+      $('div#production_subitems').addClass('show');
+
+      var _tmp = $("#recordid").val();
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+    });

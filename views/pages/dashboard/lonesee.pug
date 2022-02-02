@@ -1,0 +1,66 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm လုံးစီး
+  h1.page-header-mm လုံးစီး
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm လုံးစီး
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./lonesee/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-lonesee').addClass('active');
+      $('div#setup_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/lonesee?order=createddate,desc",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "lonesee"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "lonesee" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 2, orderable: false, render: dataTableActionsRenderer("./lonesee/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/lonesee/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

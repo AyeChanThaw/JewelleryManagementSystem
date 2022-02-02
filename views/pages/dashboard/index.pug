@@ -1,0 +1,114 @@
+extends ../../includes/layout-dashboard
+block content
+  h1.page-header Dashboard
+  div.row.placeholders
+    div.col-xs-12.col-sm-4.placeholder
+      a.dash-cat(href="./get-goldsmith")
+        div.placeholder-box
+          br
+          h1.icon-size
+            i.fa.fa-coins
+          h4.mm အထည်ကြမ်း
+          span.text-muted
+            i.fa#office-sign
+            | &nbsp; Total
+            span#get_goldsmith
+              strong 0 &nbsp;
+    div.col-xs-12.col-sm-4.placeholder
+      a.dash-cat(href="./customer")
+        div.placeholder-box
+          br
+          h1.icon-size
+            i.fa.fa-users
+          h4 ဝယ်သူများ
+          span.text-muted
+            i.fa#residence-sign
+            | &nbsp; Total
+            span#customers
+              strong 0 &nbsp;
+    div.col-xs-12.col-sm-4.placeholder
+      a.dash-cat(href="./item")
+        div.placeholder-box
+          br
+          h1.icon-size
+            i.fa.fa-money-check
+          h4 Showroom ပစ္စည်းများ
+          span.text-muted
+            i.fa#residence-sign
+            | &nbsp; Total
+            span#item
+              strong 0 &nbsp;
+      
+  h2.sub-header Weekly Diamond Sale
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Date
+          th Voucher No
+          th Customer Code
+          th Customer Name
+          th Sale Person Name
+          th Item Code
+          th Item Name
+          th.mm အလေးချိန်
+          th.mm တန်ဖိုး
+          //- th(id="action") Action
+      tbody
+  
+  script.
+    $(document).ready(function(){
+      var token = "!{token}";
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#action").hide();
+      let current = new Date();
+      let month = current.getMonth() + 1;
+      const year = current.getFullYear();
+      let day = current.getDate();
+      const currentDate = day + "/" + month + "/" + year;
+      $.ajax({
+        url: "/api/dashboardview/getData?date="+currentDate,
+        headers: {"authorization": "Bearer " + token},
+        success: function(result){
+          console.log("result ", result);
+          var get_goldsmith = result.get_goldsmith[0].count;
+          var customer = result.customer[0].count;
+          var item = result.item[0].count;
+          $("#get_goldsmith").addClass("text-primary").html("<h2><strong>"+ get_goldsmith +"</strong></h2> ");
+          $("#customers").addClass("text-primary").html("<h2><strong>"+ customer +"</strong></h2> ");
+          $("#item").addClass("text-primary").html("<h2><strong>"+ item +"</strong></h2> ");
+        }
+      });
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/dashboardview/getSaleDiamond",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data",
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "date" },
+              { "data": "voc_no" },
+              { "data": "customer_code" },
+              { "data": "customer_name" },
+              { "data": "sale_person_name" },
+              { "data": "item_code" },
+              { "data": "item_name" },
+              { "data": "wgt_gm" },
+              { "data": "price" },
+              //- { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 9, render: dataTablePriceWithCommas() }
+            //- { targets: 7, orderable: false, render: dataTableDetailActionsRenderer("./order/details", "#{permission.access}") }
+          ]
+      });
+    });

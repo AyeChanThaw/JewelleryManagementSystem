@@ -1,0 +1,68 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span Branch
+  h1.page-header Branch
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Code
+          th Branch
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./branch/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-branch').addClass('active');
+      $('div#setup_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/branch",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "branch"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "branch_code" },
+              { "data": "branch_name" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 3, orderable: false, render: dataTableActionsRenderer("./branch/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/branch/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

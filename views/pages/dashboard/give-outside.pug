@@ -1,0 +1,69 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm အပြင် ပန်းတိမ်ပေး
+  h1.page-header-mm အပြင် ပန်းတိမ်ပေး
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th.mm ပန်းထိမ်ဆရာ
+          th.actions-3
+            a.btn.btn-success.list-action-text(href="./give-outside/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-give-outside').addClass('active');
+      $('div#production_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/give_outside?columns=give_outside.*,goldsmith.goldsmith_name&join=left,goldsmith,goldsmith_id,eq,goldsmith.id",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "give_outside"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "date" },
+              { "data": "goldsmith_name" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 3, orderable: false, render: dataTableGiveOutsideActionsRenderer("./give-outside/preview", "./give-outside/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/give-outside/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

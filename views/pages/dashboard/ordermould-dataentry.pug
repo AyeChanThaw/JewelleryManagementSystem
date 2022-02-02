@@ -1,0 +1,155 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/ordermould-dataentry") အထည်ကြမ်း Data Entry
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm အထည်ကြမ်း Data Entry
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='code') Code
+        div.col-sm-10
+          input.form-control#code(type='text', name='code', value=params.code, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='category_id') အမျိုးအစား
+        div.col-sm-10
+          select#category_id.selectpicker.form-control(name='category_id', value=params.category_id, data-value=params.category_id, data-live-search="false", data-size="20", required)
+
+      //- div.form-group.row
+      //-   label.col-sm-2.control-label(for='wgt_gm') Gram
+      //-   div.col-sm-10
+      //-       input.form-control.model-stock-code#wgt_gm(class='container text-right', type='number', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='goldrate') ပဲရည်
+        div.col-sm-10
+          select#goldrate.selectpicker.form-control(name='goldrate', value=params.goldrate, data-value=params.goldrate, data-live-search="false", data-size="8", required)
+            option(value="") [Select one]
+            option(value="a") ၁၆ ပဲရည်
+            option(value="b") ၁၅ ပဲရည်
+            option(value="c") ၁၄ ပဲရည်
+            option(value="d") ၁၃ ပဲရည်
+
+      div.text-right#check-goldrate-stock
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='gold_wgt_gm') ရွှေသား (gm)
+        div.col-sm-10
+          input.form-control#gold_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='gold_wgt_gm', value=params.gold_wgt_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='wgt_gm') အထည်ကြမ်း (gm)
+        div.col-sm-10
+          input.form-control#wgt_gm(class='container text-right', type='decimalnumber', min="0", name='wgt_gm', value=params.wgt_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='return_wgt_gm') အပင်တံ (gm)
+        div.col-sm-10
+          input.form-control#return_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='return_wgt_gm', value=params.return_wgt_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='reduce_wgt_gm') အလျော့ (gm)
+        div.col-sm-10
+          input.form-control#reduce_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='reduce_wgt_gm', value=params.reduce_wgt_gm, required)
+      div.text-right#check-reduce
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-order-mould-dataentry').addClass('active');
+      $('div#dataentry_subitems').addClass('show');
+
+      var _tmp = $("#recordid").val();
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $("select#goldrate").Template({
+        "template": "<option value='a'>၁၆ ပဲရည်</option><option value='b'>၁၅ ပဲရည်</option><option value='c'>၁၄ ပဲရည်</option><option value='d'>၁၃ ပဲရည်</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#goldrate').data('value');
+        if (selectedVal) {
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#goldrate').selectpicker('refresh');
+      });
+
+      $('#category_id').Template({
+        "template": "<option value='${=id}'>${=category_name}</option>",
+        "ajax": {
+          "url": "/api/customerview/getCategory",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "data"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#category_id').data('value');
+        if (selectedVal) {
+          $('#category_id').selectpicker('val', selectedVal);
+        }
+        $('#category_id').selectpicker('refresh');
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

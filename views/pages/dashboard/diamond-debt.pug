@@ -1,0 +1,57 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm စိန်အကြွေးလက်ကျန်
+  h1.page-header-mm စိန်အကြွေးလက်ကျန်
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th.mm အဝယ်ဒိုင်
+          th.mm ဘောင်ချာနံပါတ်
+          th Amount
+          th.mm ကြွေးကျန်ကာရက်အလေးချိန် 
+          //- th.mm Currency
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-diamond-debt').addClass('active');
+      $('div#supplier_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/diamond_debt?columns=diamond_debt.*,supplier.supplier_name,whole_diamond.voc_no&join=left,supplier,supplier_id,eq,supplier.id&join=left,whole_diamond,wholediamond_id,eq,whole_diamond.id",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "diamond_debt"
+          },
+          "columns": [
+              { "data": "id", "className": "no-action" },
+              { "data": "date" },
+              { "data": "supplier_name" },
+              { "data": "voc_no" },
+              //- { "data": "goldraw" },
+              { "data": "balance" },
+              { "data": "debt_carat" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 4, render: dataTableWithUSD() }
+          ]
+      });
+    });

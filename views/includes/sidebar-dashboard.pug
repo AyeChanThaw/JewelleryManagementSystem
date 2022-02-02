@@ -1,0 +1,175 @@
+// Side Menu
+aside.col-md-2.d-md-block.bg-light.sidebar.sidebar-hide
+  div.sidebar-sticky
+    if permission.dashboard.length > 0
+      each dash in permission.dashboard
+        ul.nav.flex-column
+          li#menu-dashboard.nav-item.active
+            a.nav-link(href="/" + dash.program)
+              i(class=dash.icon)
+              | &nbsp; #{dash.name}
+              span.sr-only (current)
+
+    if permission.manage.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("admin_subitems");')
+        span Adminstration
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#admin_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each ma in permission.manage
+            li.nav-item(id="menu-"+ ma.program )
+              a.nav-link(href="/" + ma.program)
+                i(class= ma.icon)
+                | &nbsp; #{ma.name}
+
+    if permission.setup.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("setup_subitems");')
+        span SETUP
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#setup_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each gen in permission.setup
+            li.nav-item(id="menu-" + gen.program)
+              a.nav-link(href="/" + gen.program)
+                i(class=gen.icon)
+                | &nbsp; #{gen.name}
+
+    if permission.setup.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("dataentry_subitems");')
+        span DATA ENTRY
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#dataentry_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each entry in permission.dataentry
+            li.nav-item(id="menu-" + entry.program)
+              a.nav-link(href="/" + entry.program)
+                i(class=entry.icon)
+                | &nbsp; #{entry.name}
+
+    if permission.supplier.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("supplier_subitems");')
+        span SUPPLIER
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#supplier_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each spl in permission.supplier
+            li.nav-item(id="menu-" + spl.program)
+              a.nav-link(href="/" + spl.program)
+                i(class=spl.icon)
+                | &nbsp; #{spl.name}
+
+    if permission.production.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("production_subitems");')
+        span Production
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#production_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each prodcu in permission.production
+            li.nav-item(id="menu-"+ prodcu.program )
+              a.nav-link(href="/" + prodcu.program)
+                i(class= prodcu.icon)
+                | &nbsp; #{prodcu.name}
+
+    if permission.sale.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("sale_subitems");')
+        span SALE
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#sale_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each inf in permission.sale
+            li.nav-item(id="menu-" + inf.program)
+              a.nav-link(href="/" + inf.program)
+                i(class=inf.icon)
+                | &nbsp; #{inf.name}
+
+    if permission.purchase.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("purchase_subitems");')
+        span PURCHASE
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#purchase_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each cus in permission.purchase
+            li.nav-item(id="menu-"+ cus.program)
+              a.nav-link(href="/"+ cus.program)
+                i(class=cus.icon)
+                | &nbsp; #{cus.name}
+
+    if permission.cashinout.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("cashinout_subitems");')
+        span CASH IN/OUT
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#cashinout_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each cash in permission.cashinout
+            li.nav-item(id="menu-"+ cash.program)
+              a.nav-link(href="/"+ cash.program)
+                i(class=cash.icon)
+                | &nbsp; #{cash.name}
+
+    if permission.exchange.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("exchange_subitems");')
+        span EXCHANGE
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#exchange_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each exg in permission.exchange
+            li.nav-item(id="menu-"+ exg.program)
+              a.nav-link(href="/"+ exg.program)
+                i(class=exg.icon)
+                | &nbsp; #{exg.name}
+
+    if permission.returnshowroom.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("returnshowroom_subitems");')
+        span RETURN SHOWROOM
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#returnshowroom_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each r_sr in permission.returnshowroom
+            li.nav-item(id="menu-"+ r_sr.program)
+              a.nav-link(href="/"+ r_sr.program)
+                i(class=r_sr.icon)
+                | &nbsp; #{r_sr.name}
+
+    if permission.returnproduction.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("returnproduction_subitems");')
+        span RETURN PRODUCTION
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#returnproduction_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each r_p in permission.returnproduction
+            li.nav-item(id="menu-"+ r_p.program)
+              a.nav-link(href="/"+ r_p.program)
+                i(class=r_p.icon)
+                | &nbsp; #{r_p.name}
+
+    if permission.report.length > 0
+      h6.sidebar-heading.d-flex.justify-content-between.align-items-center.text-muted(onclick = 'show_sub("report_subitems");')
+        span REPORT
+        a.d-flex.align-items-center.text-muted(href="#")
+          i.fa.fa-angle-down
+      div#report_subitems.sidebar-group.collapse
+        ul.nav.flex-column.mb-2
+          each cus in permission.report
+            li.nav-item(id="menu-"+ cus.program)
+              a.nav-link(href="/"+ cus.program)
+                i(class=cus.icon)
+                | &nbsp; #{cus.name}
+
+    
+script.
+  $(document).ready(function(){
+    $("#nav-button").on("click",function(){
+      $(".sidebar").toggleClass('sidebar-show').toggleClass('sidebar-hide');
+    });
+  });

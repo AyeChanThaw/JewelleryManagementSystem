@@ -1,0 +1,277 @@
+//- လက်ကျန် = ပေးထည် - (အပ်ထည် + %amount + ကျရွှေ)
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/get-goldsmith") ပန်းထိမ်အပ်
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm ပန်းထိမ်အပ်
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#item_id(type='hidden', name='item_id', value=params.item_id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='goldsmith_id') ပန်းထိမ်ဆရာ
+        div.col-sm-10
+          select#goldsmith_id.selectpicker.form-control(name='goldsmith_id', value=params.goldsmith_id, data-value=params.goldsmith_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='code') Code
+        div.col-sm-10
+          select#goldsmith_code_id.selectpicker.form-control(name='goldsmith_code_id', value=params.goldsmith_code_id, data-value=params.goldsmith_code_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='pay_wgt_gm') ပေးထည်
+        div.col-sm-10
+            input.form-control.model-stock-code#pay_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='pay_wgt_gm', value=params.pay_wgt_gm, maxlength="55", readonly)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='wgt_gm') အပ်ထည်
+        div.col-sm-10
+            input.form-control.model-stock-code#wgt_gm(class='container text-right', type='decimalnumber', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='gm_percent') %
+        div.col-sm-10
+          input.form-control.model-stock-code#gm_percent(class='container text-right', type='decimalnumber', min="0", name='gm_percent', value=params.gm_percent, maxlength="55", required)
+      div.form-group.row
+        label.col-sm-2.control-label(for='gm_amt') % Amount
+        div.col-sm-10
+          input.form-control.model-stock-code#gm_amt(class='container text-right', type='decimalnumber', min="0", name='gm_amt', value=params.gm_amt, maxlength="55", readonly)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='get_wgt_gm') ကျရွှေ
+        div.col-sm-10
+          input.form-control.model-stock-code#get_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='get_wgt_gm', value=params.get_wgt_gm, maxlength="55", required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='remain_wgt_gm') လက်ကျန်
+        div.col-sm-10
+          input.form-control.model-stock-code#remain_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='remain_wgt_gm', value=params.remain_wgt_gm, maxlength="55", required)
+
+      div.form-group.row
+        div.col-sm-6.label-data
+          strong finished &nbsp;
+            input#isfinished(type="checkbox", name="isfinished", value=params.isfinished, checked=(params.isfinished == 1))
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      //- var total_of_give = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-get-goldsmith').addClass('active');
+      $('div#production_subitems').addClass('show');
+      $("#check-reduce").hide();
+
+      var _tmp = $("#recordid").val();
+      var isfinished = $("#isfinished").val();
+      if (_tmp != "" && isfinished == 1) {
+        document.getElementById('date').setAttribute("readonly", "");
+        document.getElementById('wgt_gm').setAttribute("readonly", "");
+        document.getElementById('pay_wgt_gm').setAttribute("readonly", "");
+        document.getElementById('get_wgt_gm').setAttribute("readonly", "");
+        document.getElementById('remain_wgt_gm').setAttribute("readonly", "");
+        document.getElementById('isfinished').setAttribute("disabled", true);
+        $("#submitBtn").hide();
+      }
+      if (_tmp == '') {
+        //- submitBtn.setAttribute("disabled", "");
+      } else {
+        document.getElementById('goldsmith_id').setAttribute("disabled", true);
+        document.getElementById('goldsmith_code_id').setAttribute("disabled", true);
+      }
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $("select#goldrate").Template({
+        "template": "<option value='a'>၁၆ ပဲရည်</option><option value='b'>၁၅ ပဲရည်</option><option value='c'>၁၄ ပဲရည်</option><option value='d'>၁၃ ပဲရည်</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#goldrate').data('value');
+        if (selectedVal) {
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#goldrate').selectpicker('refresh');
+      });
+
+      $('#category_id').Template({
+        "template": "<option value='${=id}'>${=category_name}</option>",
+        "ajax": {
+          "url": "/api/category",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "category"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#category_id').data('value');
+        if (selectedVal) {
+          $('#category_id').selectpicker('val', selectedVal);
+        }
+        $('#category_id').selectpicker('refresh');
+      });
+
+      $('#goldsmith_id').Template({
+        "template": "<option value='${=id}'>${=goldsmith_name}</option>",
+        "ajax": {
+          "url": "/api/goldsmith",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "goldsmith"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#goldsmith_id').data('value');
+        if (selectedVal) {
+          $('#goldsmith_id').selectpicker('val', selectedVal);
+        }
+        $('#goldsmith_id').selectpicker('refresh');
+      });
+
+      $("#goldsmith_id").change(function(event) {
+        $('#goldsmith_code_id').empty();
+        if (_tmp == "") {
+          $('#goldsmith_code_id').Template({
+            "template": "<option value='${=goldsmith_code_id}'>${=code}</option>",
+            "ajax": {
+            "url": "/api/ordermouldview/getCodeByGoldsmith?goldsmith_id=" + $('#goldsmith_id option:selected').val(),
+            "headers": {"authorization": "Bearer " + token},
+                "dataSrc": "data"
+            }
+          }).on('completed', function() {
+              var selectedVal = $('#goldsmith_code_id').data('value');
+              if (selectedVal) {
+                $('#goldsmith_code_id').selectpicker('val', selectedVal);
+              }
+              $('#goldsmith_code_id').selectpicker('refresh');
+          });
+        } else {
+          $('#goldsmith_code_id').Template({
+            "template": "<option value='${=goldsmith_code_id}'>${=code}</option>",
+            "ajax": {
+            "url": "/api/goldsmith_code?columns=id@goldsmith_code_id,code",
+            "headers": {"authorization": "Bearer " + token},
+                "dataSrc": "goldsmith_code"
+            }
+          }).on('completed', function() {
+              var selectedVal = $('#goldsmith_code_id').data('value');
+              if (selectedVal) {
+                $('#goldsmith_code_id').selectpicker('val', selectedVal);
+              }
+              $('#goldsmith_code_id').selectpicker('refresh');
+          });
+        }        
+      });
+
+      $("#goldsmith_code_id").change(function(event) {
+        $.ajax({
+          url: "/api/ordermouldview/getTotalofGive?goldsmith_code_id=" +  $('#goldsmith_code_id option:selected').val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            $("#pay_wgt_gm").val(result.total_wgt_gm);
+            $("#item_id").val(result.item_id);
+          }
+        })
+      })
+
+      $("#isfinished").change(function() {
+        if(this.checked) {
+          $("#isfinished").val("on");
+        } else {
+          $("#isfinished").val("");
+        }
+      });
+
+      $("#wgt_gm").change(function (event) {
+        getGmAmt();
+        getTotal();
+      });
+
+      $("#gm_percent").change(function (event) {
+        getGmAmt();
+        getTotal();
+      });
+
+      $("#get_wgt_gm").change(function (event) {
+        getTotal();
+      });
+
+      function getGmAmt() {
+        var wgt_gm = Number($("#wgt_gm").val());
+        var gm_percent = Number($("#gm_percent").val());
+        //- if (wgt_gm && gm_percent) {
+        var amt = wgt_gm * (gm_percent / 100);
+        $("#gm_amt").val(amt.toFixed(2));
+        //- }
+      }
+
+      function getTotal() {
+        var wgt_gm = Number($("#wgt_gm").val());
+        var gm_amt = Number($("#gm_amt").val());
+        var get_wgt_gm = Number($("#get_wgt_gm").val());
+        var pay_wgt_gm = Number($("#pay_wgt_gm").val());
+        //- if (wgt_gm && gm_amt && get_wgt_gm) {
+        var remain_wgt_gm = pay_wgt_gm - (wgt_gm + gm_amt + get_wgt_gm);
+        $("#remain_wgt_gm").val(remain_wgt_gm.toFixed(2));
+        //- }
+      }
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

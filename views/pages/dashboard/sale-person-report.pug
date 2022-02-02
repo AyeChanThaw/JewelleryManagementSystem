@@ -1,0 +1,167 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm Sale Person Report
+  h1.page-header.mm Sale Person Report
+
+  form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+    div.form-group.row
+        label.col-sm-2.control-label(for='startdate') From Date
+        div.col-sm-10
+          input.form-control.fromdate#start.mm(type='text', name='start', required)
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='enddate') To Date
+      div.col-sm-10
+        input.form-control.todate#end.mm(type='text', name='end', required)
+
+    div.row.justify-content-center.form-actions
+      button.btn.btn-primary#loadBtn(type='button', role='button') Load
+
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Sale Person Name
+          th Total Qty
+          th Total Amount
+      tbody
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var saleperson_data;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-sale-person-report').addClass('active');
+      $('div#report_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+
+      let current = new Date();
+      let month = current.getMonth() + 1;
+      const year = current.getFullYear();
+      let day = current.getDate();
+      if (month < 10)
+        month = "0" + month;
+      if (day < 10)
+        day = "0" + day;
+
+      const showcurrent = day + "/" + month + "/" + year;
+      const showstart = "01/" + month + "/" + year;
+      $("#start").val(showstart);
+      $("#end").val(showcurrent);
+      reload(showstart, showcurrent);
+      $("#loadBtn").on('click', function(event){
+        reload($("#start").val(), $("#end").val());
+      });
+
+      var item = 1;
+      function reload(start, end) {
+        var table = $('table#list').DataTable({
+          destroy: true,
+          autoWidth: true,
+          ajax: { 
+            "url": "/api/reportview/getSalePerson?start="+start+"&end="+end,
+            "type": "GET",
+            "headers": {"authorization": "Bearer " + token}
+          },
+          "drawCallback": function (settings) { 
+            // Here the response
+            saleperson_data = settings.json;
+            console.log("data ", saleperson_data);
+          },
+          columns: [
+            {
+              class: 'item',
+              orderable: false,
+              data: null,
+              defaultContent: '<img src="http://i.imgur.com/SD7Dz.png">'
+            },
+            //- { "data": "id" },
+            { "data": "sale_person_name" },
+            { "data": "total_qty" },
+            { "data": "total_amt" }
+          ],
+          columnDefs: [
+            //- { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 3, render: dataTableAmtWithCommas() }
+          ],
+          lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+          dom:  "<'row'<'col-sm-12 col-md-12 mb-1'B>>" +
+                "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+          buttons: [
+            {
+              extend: 'excel',
+              text: 'Excel',
+              charset: 'utf-8',
+              className: 'success-excel',
+              filename: 'Sale Person Report',
+              exportOptions: {
+                columns: [ 0, 1, 2, 3, 4 ]
+              },
+              title: 'Sale Person Report',
+            }
+          ]
+        });
+        $('#list tbody').on('click', 'tr td.item', function() {
+          var tr = $(this).closest('tr');
+          var index = $(this).closest('tr').first();
+          var id = index[0].sectionRowIndex;
+          var row = table.row(tr);
+          if (row.child.isShown()) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+          } else {
+            // Open this row
+            row.child(formatItem(item)).show();
+            tr.addClass('shown');
+            //- console.log("item ", item);
+            var itemTable = $('#item_' + item).dataTable({
+              //- data: row.data().items,
+              data: saleperson_data.data[id].items,
+              paging: false,
+              searching: false,
+              information: false,
+              columns: [
+                {},
+                { "data": "date" },
+                { "data": "voc_no" },
+                { "data": "customer_name", "className": "mm" },
+                { "data": "item_code" },
+                { "data": "wgt_gm" },
+                { "data": "wgt_k" },
+                { "data": "wgt_p" },
+                { "data": "wgt_y" },
+                { "data": "diamond_qty" },
+              ],
+              columnDefs: [
+                { targets: 1, render: dataTableDateRenderer() }
+              ],
+              dom: "<'row'<'col-sm-12'tr>>",
+              //- order: [
+              //-   [1, 'asc']
+              //- ]
+            });
+
+            item += 1;
+          }
+        });
+        return table;
+      }
+
+    });
+
+    function formatItem(table_id) {
+      return '<table class="table table-striped" id="item_' + table_id + '">' +
+        '<thead><tr><th></th><th>Date</th><th>Voucher No</th><th>Customer Name</th><th>Item Code</th><th>အလေးချိန်</th><th>ကျပ်</th><th>ပဲ</th><th>ရွေး</th><th>စိန်အရေတွက်</th></tr></thead></table>';
+    }

@@ -1,0 +1,819 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/purchase") Purchase
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header အဝယ်
+  //- div.modal.fade#dialogAddDiamond(tabindex='-1', role='dialog', aria-labelledby='AddDiamond')
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`, enctype="application/x-www-form-urlencoded", autocomplete="off")
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      input#cashier_id(type='hidden', name='cashier_id', value=params.cashier_id)
+
+      if params.finished !== "Yes"
+        div(style="margin-left: 10px")
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='voc_no') Voucher No.
+            div.col-sm-3.label-data
+              input.invoice.form-control#voc_no.mm(type='text', name='voc_no', value=params.voc_no, maxlength="55", readonly)
+            div.col-sm-2.label-data
+              label.control-label(for='purchase_date') Date
+            div.col-sm-4.label-data
+              input.form-control#purchase_date(type='text', name='purchase_date', value=params.purchase_date, maxlength="55", required)
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='ref_no') Reference No. 
+            div.col-sm-3.label-data
+              input.form-control#ref_no.mm(type='text', name='ref_no', value=params.ref_no, maxlength="55", required)
+            div.col-sm-2.label-data
+              label.control-label(for='cashier_name') Cashier Name
+            div.col-sm-4.label-data
+              input.form-control#cashier_name.mm(type='text', name='cashier_name', value=params.cashier_name, maxlength="55", readonly)
+
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label.mm(for='supplier_id') အဝယ်ဒိုင်
+            div.col-sm-3.label-data
+              select#supplier_id.selectpicker.form-control(name='supplier_id', value=params.supplier_id, data-value=params.supplier_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]  
+            //- div.col-sm-2.label-data
+            //-   label.control-label.mm(for='paymenttype') အဝယ်အမျိုးအစား
+            //- div.col-sm-4.label-data
+            //-   select#paymenttype.selectpicker.form-control(name='paymenttype', value=params.paymenttype, data-value=params.paymenttype, data-live-search="false", data-size="20", required)
+            //-     option.mm(value="cash") လက်ငင်း
+            //-     option.mm(value="debt") အကြွေး
+        
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') ရွှေချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#gold_gm(class='container text-right', type='decimalnumber', name='gold_gm', min="0", value=params.gold_gm || 0, maxlength="55")
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_gm') ဂရမ်
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') စျေးနှုန်း
+                  div.col-sm-8
+                    input.gm-style.form-control#gold_price(class='container text-right', type='number', min="0", name='gold_price', value=params.gold_price || 0, maxlength="55")            
+            div.form-group.row    
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#gold_k(class='container text-right', class='losswgt_kpy_keypress', type='number', name='gold_k', value=params.gold_k || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#gold_p(class='container text-right', class='losswgt_kpy_keypress', type='number', name='gold_p', value=params.gold_p || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#gold_y(class='container text-right', class='losswgt_kpy_keypress', type='decimalnumber', name='gold_y', value=params.gold_y || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#gold_total(class='container text-right', type='number', min="0", name='gold_total', value=params.gold_total || 0, maxlength="55", readonly)            
+
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') ကြေးချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#brass_gm(class='container text-right', type='decimalnumber', name='brass_gm', min="0", value=params.brass_gm || 0, maxlength="55")
+                  div.col-sm-0.label-data
+                    label.control-label(for='brass_gm') ဂရမ်
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') စျေးနှုန်း
+                  div.col-sm-8
+                    input.gm-style.form-control#brass_price(class='container text-right', type='number', min="0", name='brass_price', value=params.brass_price || 0, maxlength="55")          
+              
+
+            div.form-group.row    
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#brass_k(class='container text-right', class='losswgt_kpy_keypress', type='number', name='brass_k', value=params.brass_k || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='wgt_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#brass_p(class='container text-right', class='losswgt_kpy_keypress', type='number', name='brass_p', value=params.brass_p || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='brass_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#brass_y(class='container text-right', class='losswgt_kpy_keypress', type='decimalnumber', name='brass_y', value=params.brass_y || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='brass_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#brass_total(class='container text-right', type='number', min="0", name='brass_total', value=params.brass_total || 0, maxlength="55", readonly)            
+
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') ဘော်ချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#silver_gm(class='container text-right', type='decimalnumber', name='silver_gm', min="0", value=params.silver_gm || 0, maxlength="55")
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_gm') ဂရမ်  
+              div.col-sm-5
+                  div.row
+                    div.col-sm-4.label-data
+                      label.control-label(for='') စျေးနှုန်း
+                    div.col-sm-8
+                      input.gm-style.form-control#silver_price(class='container text-right', type='number', min="0", name='silver_price', value=params.silver_price || 0, maxlength="55")            
+
+              
+            div.form-group.row
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#silver_k(class='container text-right', type='number', name='silver_k', value=params.silver_k || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#silver_p(class='container text-right', type='number', name='silver_p', value=params.silver_p || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#silver_y(class='container text-right', type='number', name='silver_y', value=params.silver_y || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#silver_total(class='container text-right', type='number', min="0", name='silver_total', value=params.silver_total || 0, maxlength="55", readonly)            
+        
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') မိုချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#mo_gm(class='container text-right', type='decimalnumber', name='mo_gm', min="0", value=params.mo_gm || 0, maxlength="55")
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_gm') ဂရမ်
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') စျေးနှုန်း
+                  div.col-sm-8
+                    input.gm-style.form-control#mo_price(class='container text-right', type='number', min="0", name='mo_price', value=params.mo_price || 0, maxlength="55")            
+
+            div.form-group.row    
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#mo_k(class='container text-right', type='number', name='mo_k', value=params.mo_k || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#mo_p(class='container text-right', type='number', name='mo_p', value=params.mo_p || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#mo_y(class='container text-right', type='number', name='mo_y', value=params.mo_y || 0, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#mo_total(class='container text-right', type='number', min="0", name='mo_total', value=params.mo_total || 0, maxlength="55", readonly)            
+
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='mo_code') မိုကုဒ်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.invoice.form-control#mo_code.mm(type='text', name='mo_code', value=params.mo_code, maxlength="55", readonly)
+              
+        div(style="margin-left: 10px")
+          div.form-group.row
+            label.col-sm-2.control-label(for='netamount') Net Amount
+            div.col-sm-5
+              input.form-control.mm#netamount(class='container text-right', type='text', name='netamount', value=params.netamount, readonly)
+          
+          
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='remark') မှတ်ချက်
+            div.col-sm-9
+              textarea.form-control.mm#remark(name='remark')= params.remark
+
+          div.form-group.row
+            div.col-sm-2
+              label.control-label(for='finished', class='font-weight-bold') Finished
+            div.col-sm-6
+              input.form-check-input#finished(type='checkbox', name='finished', value="Yes", checked = false)
+
+        div.form-group.row.justify-content-md-center.form-actions
+          button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+          a.btn.btn-secondary#actionCancel(href=listUrl, role='button', name='cancel') Cancel
+      else
+        div(style="margin-left: 10px")
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='voc_no') Voucher No.
+            div.col-sm-3.label-data
+              input.invoice.form-control#voc_no.mm(type='text', name='voc_no', value=params.voc_no, maxlength="55", readonly)
+            div.col-sm-2.label-data
+              label.control-label(for='purchase_date') Date
+            div.col-sm-4.label-data
+              input.form-control#purchase_date.mm(type='text', name='purchase_date', value=params.purchase_date, maxlength="55", readonly)
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='ref_no') Reference No. 
+            div.col-sm-3.label-data
+              input.form-control#ref_no.mm(type='text', name='ref_no', value=params.ref_no, maxlength="55", readonly)
+            div.col-sm-2.label-data
+              label.control-label(for='cashier_name') Cashier Name
+            div.col-sm-4.label-data
+              input.form-control#cashier_name.mm(type='text', name='cashier_name', value=params.cashier_name, maxlength="55", readonly)
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label.mm(for='supplier_id') အဝယ်ဒိုင်
+            div.col-sm-3.label-data
+              select#supplier_id.selectpicker.form-control(name='supplier_id', value=params.supplier_id, data-value=params.supplier_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+            //- div.col-sm-2.label-data
+            //-   label.control-label.mm(for='paymenttype') အဝယ်အမျိုးအစား
+            //- div.col-sm-4.label-data
+            //-   select#paymenttype.selectpicker.form-control(name='paymenttype', value=params.paymenttype, data-value=params.paymenttype, data-live-search="false", data-size="20", required)
+            //-     option.mm(value="cash") လက်ငင်း
+            //-     option.mm(value="debt") အကြွေး  
+        
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') ရွှေချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#gold_gm(class='container text-right', type='number', name='gold_gm', min="0", value=params.gold_gm, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_gm') ဂရမ်
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') စျေးနှုန်း
+                  div.col-sm-8
+                    input.gm-style.form-control#gold_price(class='container text-right', type='number', min="0", name='gold_price', value=params.gold_price, maxlength="55", readonly)            
+            div.form-group.row    
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#gold_k(class='container text-right', class='losswgt_kpy_keypress', type='number', name='gold_k', value=params.gold_k, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#gold_p(class='container text-right', class='losswgt_kpy_keypress', type='number', name='gold_p', value=params.gold_p, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#gold_y(class='container text-right', class='losswgt_kpy_keypress', type='decimalnumber', name='gold_y', value=params.gold_y, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='gold_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#gold_total(class='container text-right', type='number', min="0", name='gold_total', value=params.gold_total, maxlength="55", readonly)            
+
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') ကြေးချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#brass_gm(class='container text-right', type='number', name='brass_gm', min="0", value=params.brass_gm, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='brass_gm') ဂရမ်
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') စျေးနှုန်း
+                  div.col-sm-8
+                    input.gm-style.form-control#brass_price(class='container text-right', type='number', min="0", name='brass_price', value=params.brass_price, maxlength="55", readonly)            
+              
+
+            div.form-group.row    
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#brass_k(class='container text-right', class='losswgt_kpy_keypress', type='number', name='brass_k', value=params.brass_k, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='wgt_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#brass_p(class='container text-right', class='losswgt_kpy_keypress', type='number', name='brass_p', value=params.brass_p, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='brass_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#brass_y(class='container text-right', class='losswgt_kpy_keypress', type='decimalnumber', name='brass_y', value=params.brass_y, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='brass_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#brass_total(class='container text-right', type='number', min="0", name='brass_total', value=params.brass_total, maxlength="55", readonly)            
+
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') ဘော်ချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#silver_gm(class='container text-right', type='number', name='silver_gm', min="0", value=params.silver_gm, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_gm') ဂရမ်  
+              div.col-sm-5
+                  div.row
+                    div.col-sm-4.label-data
+                      label.control-label(for='') စျေးနှုန်း
+                    div.col-sm-8
+                      input.gm-style.form-control#silver_price(class='container text-right', type='number', min="0", name='silver_price', value=params.silver_price, maxlength="55", readonly)            
+
+              
+            div.form-group.row
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#silver_k(class='container text-right', type='number', name='silver_k', value=params.silver_k, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#silver_p(class='container text-right', type='number', name='silver_p', value=params.silver_p, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#silver_y(class='container text-right', type='number', name='silver_y', value=params.silver_y, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='silver_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#silver_total(class='container text-right', type='number', min="0", name='silver_total', value=params.silver_total, maxlength="55", readonly)            
+        
+        div.card
+          div.cart-body
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='') မိုချိန်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.gm-style.form-control#mo_gm(class='container text-right', type='number', name='mo_gm', min="0", value=params.mo_gm, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_gm') ဂရမ်
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') စျေးနှုန်း
+                  div.col-sm-8
+                    input.gm-style.form-control#mo_price(class='container text-right', type='number', min="0", name='mo_price', value=params.mo_price, maxlength="55", readonly)            
+
+            div.form-group.row    
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#mo_k(class='container text-right', type='number', name='mo_k', value=params.mo_k, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_k') ကျပ်
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#mo_p(class='container text-right', type='number', name='mo_p', value=params.mo_p, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_p') ပဲ
+              div.col-sm-2
+                div.row
+                  div.col-sm-9
+                    input.form-control#mo_y(class='container text-right', type='number', name='mo_y', value=params.mo_y, maxlength="55", readonly)
+                  div.col-sm-0.label-data
+                    label.control-label(for='mo_y') ရွေး
+              div.col-sm-5
+                div.row
+                  div.col-sm-4.label-data
+                    label.control-label(for='') ကျသင့်ငွေ
+                  div.col-sm-8
+                    input.gm-style.form-control#mo_total(class='container text-right', type='number', min="0", name='mo_total', value=params.mo_total, maxlength="55", readonly)            
+        
+            div.form-group.row
+              div.col-sm-2.label-data
+                label.control-label(for='mo_code') မိုကုဒ်
+              div.col-sm-4
+                div.row
+                  div.col-sm-10
+                    input.invoice.form-control#mo_code.mm(type='text', name='mo_code', value=params.mo_code, maxlength="55", readonly)
+
+        div(style="margin-left: 10px")
+          div.form-group.row
+            label.col-sm-2.control-label(for='netamount') Net Amount
+            div.col-sm-5
+              input.form-control.mm#netamount(class='container text-right', type='text', name='netamount', value=params.netamount, readonly)
+          
+          div.form-group.row
+            label.col-sm-2.control-label(for='remark') Remark
+            div.col-sm-9
+              textarea.form-control.mm#remark(name='remark', readonly)= params.remark
+
+        div.form-group.row.justify-content-md-center.form-actions
+          a.btn.btn-secondary#actionCancel(href=listUrl, role='button', name='cancel') Back
+
+    form#postSuccessForm(method='GET', action=listUrl)
+    
+  script(src='/js/upload.js')
+  script(src='/js/scripts-upload.js')
+  script.
+    $(document).ready(function() {
+    var token = "!{token}";
+    let netamount = 0;
+    let gold_Price, gold_Gm, gold_K, gold_Total;
+    let brass_Price, brass_Gm, brass_K, brass_Total;
+    let silver_Price, silver_Gm, silver_K, silver_Total;
+    let mo_Price, mo_Gm, mo_K, mo_Total;
+
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-purchase').addClass('active');     
+      $('div#purchase_subitems').addClass('show');          
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#purchase_date").datepicker({
+        format: "dd/mm/yyyy",
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom'
+      });
+
+      $('#supplier_id').Template({
+        "template": "<option value='${=id}'>${=name}</option>",
+        "ajax": {
+          "url": "/api/customerview/getSupplier",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "data"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#supplier_id').data('value');
+        if (selectedVal) {
+          $('#supplier_id').selectpicker('val', selectedVal);
+        }
+        $('#supplier_id').selectpicker('refresh');
+      });
+
+      var today = new Date();
+      var day = `0${today.getDate()}`.slice(-2);
+      var month = `0${today.getMonth()+1}`.slice(-2);
+      var year = today.getFullYear();
+      var showDate = `${day}/${month}/${year}`;
+      $('#purchase_date').val(showDate);
+      
+      if(!$("#netamount").val()){
+        $("#netamount").val(0);
+      }
+      
+
+      $("#gold_gm").change(function(e){
+          //- var keycode = (event.keyCode ? event.keyCode : event.which);
+          //- if(keycode == '13' && event.key === "Enter")
+          //- { 
+          $("#gold_k").val("");
+          $("#gold_p").val("");
+          $("#gold_y").val("");
+
+          var CurrentGm = $("#gold_gm").val();
+          var gold_Gm = parseFloat(CurrentGm);
+
+          $.ajax({
+            url: "/services/ChangeGmToKPY?Gm=" + gold_Gm.toString(),        
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              var _tmpkpy = result.data;
+              var _kpy = [];
+              _kpy = _tmpkpy.toString().split("-");
+              if(_kpy.length > 1){
+                $("#gold_k").val(_kpy[0].toString());
+                $("#gold_p").val(_kpy[1].toString());
+                $("#gold_y").val(_kpy[2].toString());
+              } else {
+                $("#gold_k").val(0);
+                $("#gold_p").val(0);
+                $("#gold_y").val(0);
+              }
+              
+            }
+          });
+          gold_Price = $("#gold_price").val();
+          gold_Gm = $("#gold_gm").val();
+          gold_K = gold_Gm / 16.6;
+          gold_Total = gold_K * gold_Price;
+          $("#gold_total").val(gold_Total.toFixed(0));
+          netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+          $("#netamount").val(netamount);
+          $("#gold_price").focus();
+          //- }
+      });
+      $("#gold_price").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //-   if(keycode == '13' && event.key === "Enter")
+        //-   { 
+          gold_Price = $("#gold_price").val();
+          gold_Gm = $("#gold_gm").val();
+          gold_K = gold_Gm / 16.6;
+          gold_Total = gold_K * gold_Price;
+          $("#gold_total").val(gold_Total.toFixed(0));
+          netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+          $("#netamount").val(netamount);
+          $("#brass_gm").focus();
+          //- }
+      });
+
+      $("#brass_gm").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter")
+        //- { 
+        $("#brass_k").val("");
+        $("#brass_p").val("");
+        $("#brass_y").val("");
+
+        var CurrentGm = $("#brass_gm").val();
+        var brass_Gm = parseFloat(CurrentGm);
+
+        $.ajax({
+          url: "/services/ChangeGmToKPY?Gm=" + brass_Gm.toString(),              
+          headers: {"authorization": "Bearer " + token},
+          success: function(result){
+            var _tmpkpy = result.data;
+            var _kpy = [];
+            _kpy = _tmpkpy.toString().split("-");
+            if(_kpy.length > 1){
+              $("#brass_k").val(_kpy[0].toString());
+              $("#brass_p").val(_kpy[1].toString());
+              $("#brass_y").val(_kpy[2].toString());
+            } else {
+              $("#brass_k").val(0);
+              $("#brass_p").val(0);
+              $("#brass_y").val(0);
+            }
+            
+          }
+        });
+        brass_Price = $("#brass_price").val();
+        brass_Gm = $("#brass_gm").val();
+        brass_K = brass_Gm / 16.6;
+        brass_Total = brass_K * brass_Price;
+        $("#brass_total").val(brass_Total.toFixed(0));
+        netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+        $("#netamount").val(netamount);
+        $("#brass_price").focus();
+        //- }
+      });
+      $("#brass_price").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //-   if(keycode == '13' && event.key === "Enter")
+        //-   { 
+        brass_Price = $("#brass_price").val();
+        brass_Gm = $("#brass_gm").val();
+        brass_K = brass_Gm / 16.6;
+        brass_Total = brass_K * brass_Price;
+        $("#brass_total").val(brass_Total.toFixed(0));
+        netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+        $("#netamount").val(netamount);
+        $("#silver_gm").focus();
+          //- }
+      });
+
+      $("#silver_gm").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter")
+        //- { 
+        $("#silver_k").val("");
+        $("#silver_p").val("");
+        $("#silver_y").val("");
+
+        var CurrentGm = $("#silver_gm").val();
+        var silver_Gm = parseFloat(CurrentGm);
+
+        $.ajax({
+          url: "/services/ChangeGmToKPY?Gm=" + silver_Gm.toString(),              
+          headers: {"authorization": "Bearer " + token},
+          success: function(result){
+            var _tmpkpy = result.data;
+            var _kpy = [];
+            _kpy = _tmpkpy.toString().split("-");
+            if(_kpy.length > 1){
+              $("#silver_k").val(_kpy[0].toString());
+              $("#silver_p").val(_kpy[1].toString());
+              $("#silver_y").val(_kpy[2].toString());
+            } else {
+              $("#silver_k").val(0);
+              $("#silver_p").val(0);
+              $("#silver_y").val(0);
+            }
+            
+          }
+        });
+        silver_Price = $("#silver_price").val();
+        silver_Gm = $("#silver_gm").val();
+        silver_K = silver_Gm / 16.6
+        silver_Total = silver_K * silver_Price;
+        $("#silver_total").val(silver_Total.toFixed(0));
+        netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+        $("#netamount").val(netamount);
+        $("#silver_price").focus();
+        //- }
+      });
+      $("#silver_price").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //-   if(keycode == '13' && event.key === "Enter")
+        //-   { 
+        silver_Price = $("#silver_price").val();
+        silver_Gm = $("#silver_gm").val();
+        silver_K = silver_Gm / 16.6
+        silver_Total = silver_K * silver_Price;
+        $("#silver_total").val(silver_Total.toFixed(0));
+        netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+        $("#netamount").val(netamount);
+        $("#mo_gm").focus();
+          //- }
+      });
+
+      $("#mo_gm").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter")
+        //- { 
+        $("#mo_k").val("");
+        $("#mo_p").val("");
+        $("#mo_y").val("");
+
+        var CurrentGm = $("#mo_gm").val();
+        var mo_Gm = parseFloat(CurrentGm);
+
+        $.ajax({
+          url: "/services/ChangeGmToKPY?Gm=" + mo_Gm.toString(),              
+          headers: {"authorization": "Bearer " + token},
+          success: function(result){
+            var _tmpkpy = result.data;
+            var _kpy = [];
+            _kpy = _tmpkpy.toString().split("-");
+            
+            if(_kpy.length > 1){
+              $("#mo_k").val(_kpy[0].toString());
+              $("#mo_p").val(_kpy[1].toString());
+              $("#mo_y").val(_kpy[2].toString());
+            } else {
+              $("#mo_k").val(0);
+              $("#mo_p").val(0);
+              $("#mo_y").val(0);
+            }
+            
+          }
+        });
+        mo_Price = $("#mo_price").val();
+        mo_Gm = $("#mo_gm").val();
+        mo_K = mo_Gm / 16.6;
+        mo_Total = mo_K * mo_Price;
+        $("#mo_total").val(mo_Total.toFixed(0));
+        netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+        $("#netamount").val(netamount);
+        $("#mo_price").focus();
+        //- }
+      });
+      $("#mo_price").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //-   if(keycode == '13' && event.key === "Enter")
+        //-   { 
+        mo_Price = $("#mo_price").val();
+        mo_Gm = $("#mo_gm").val();
+        mo_K = mo_Gm / 16.6;
+        mo_Total = mo_K * mo_Price;
+        $("#mo_total").val(mo_Total.toFixed(0));
+        netamount = parseInt($("#gold_total").val()) + parseInt($("#brass_total").val()) + parseInt($("#silver_total").val()) + parseInt($("#mo_total").val());
+        $("#netamount").val(netamount);
+        $("#remark").focus();
+          //- }
+      });
+
+      $("#alert").hide();
+
+      $('#entryForm').on('keypress', function(e) {
+        var keyCode = e.keyCode || e.which;
+        if (keyCode === 13) { 
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        
+        $.ajax({
+            url: $(this).attr("action"),
+            type: $(this).attr("method"),
+            data: $(this).formSerialize(),
+            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+            processData: false,
+            success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });    
+    });

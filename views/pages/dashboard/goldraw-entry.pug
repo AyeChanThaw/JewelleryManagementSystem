@@ -1,0 +1,131 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/goldraw") အထည်ကြမ်း
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm အထည်ကြမ်း
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='code') Code
+        div.col-sm-10
+          input.form-control#code(type='text', name='code', value=params.code, maxlength="55", required readonly)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control#date.mm(type='text', name='date', value=params.date, required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='supplier_id') အဝယ်ဒိုင်
+        div.col-sm-10
+          select#supplier_id.selectpicker.form-control(name='supplier_id', value=params.supplier_id, data-value=params.supplier_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='voc_no') ဘောင်ချာနံပါတ်
+        div.col-sm-10
+          input.form-control#voc_no.mm(type='text', name='voc_no', value=params.voc_no, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='wgt_gm') အလေးချိန်
+        div.col-sm-10
+          input.form-control#wgt_gm(class='container text-right', type='decimalnumber', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='netprice') ကျသင့်ငွေ
+        div.col-sm-10
+          input.form-control#netprice(class='container text-right', type='decimalnumber', min="0", name='netprice', value=params.netprice, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='netprice') အဝယ်အမျိုးအစား
+        div.col-sm-10
+          select#paymenttype.selectpicker.form-control(name='paymenttype', value=params.paymenttype, data-value=params.paymenttype, data-live-search="false", data-size="20", required)
+            option(value="cash") လက်ငင်း
+            option(value="debt") အကြွေး
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-goldraw').addClass('active');
+      $('div#purchase_subitems').addClass('show');
+      var token = "!{token}";
+
+      var _tmp = $("#recordid").val();
+      if (_tmp != '' && qty != current_qty) {
+        document.getElementById('paymenttype').setAttribute("disabled",true);
+      }
+
+      $('#supplier_id').Template({
+        "template": "<option value='${=id}'>${=supplier_name}</option>",
+        "ajax": {
+          "url": "/api/supplier",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "supplier"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#supplier_id').data('value');
+        if (selectedVal) {
+          $('#supplier_id').selectpicker('val', selectedVal);
+        }
+        $('#supplier_id').selectpicker('refresh');
+      });
+
+      $("#date").datepicker({
+        format: "dd/M/yyyy",
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom'
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

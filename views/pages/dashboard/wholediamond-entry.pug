@@ -1,0 +1,313 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/wholediamond") စိန်အဝယ်
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm စိန်အဝယ်
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='date') ရက်စွဲ 
+        div.col-sm-3.label-data
+          input.form-control.fromdate#date.mm(type='text', name='date', value=params.date, required)
+        div.col-sm-2.label-data
+          label.control-label(for='code') Code
+        div.col-sm-3.label-data
+          input.form-control#code.mm(type='text', name='code', value=params.code, maxlength="55", required readonly)
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='supplier_id') အဝယ်ဒိုင်
+        div.col-sm-3.label-data
+          select#supplier_id.selectpicker.form-control(name='supplier_id', value=params.supplier_id, data-value=params.supplier_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+        div.col-sm-2.label-data
+          label.control-label.mm(for='voc_no') ဘောင်ချာနံပါတ်
+        div.col-sm-3.label-data
+          input.form-control#voc_no.mm(type='text', name='voc_no', value=params.voc_no, maxlength="55", required)
+      
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='gemtype_id') ကျောက်အမျိုးအစား
+        div.col-sm-3.label-data
+          select#gemtype_id.selectpicker.form-control(name='gemtype_id', value=params.gemtype_id, data-value=params.gemtype_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+        div.col-sm-2.label-data
+          label.control-label.mm(for='diamondtype_id') စိန်အမျိုးအစား
+        div.col-sm-3.label-data
+          select#diamondtype_id.selectpicker.form-control(name='diamondtype_id', value=params.diamondtype_id, data-value=params.diamondtype_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+        
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='paymenttype') အဝယ်အမျိုးအစား
+        div.col-sm-3.label-data
+          select#paymenttype.selectpicker.form-control(name='paymenttype', value=params.paymenttype, data-value=params.paymenttype, data-live-search="false", data-size="20", required)
+            option.mm(value="cash") လက်ငင်း
+            option.mm(value="debt") အကြွေး
+        div.col-sm-2.label-data
+          label.control-label.mm(for='wgt_carat') အလေးချိန်
+        div.col-sm-3.label-data
+          input.form-control#wgt_carat(class='container text-right', type='decimalnumber', min="0", name='wgt_carat', value=params.wgt_carat, maxlength="55", required)
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='usd_per_carat') ၁ ကာရက်ဈေး (USD)
+        div.col-sm-3.label-data
+          input.form-control#usd_per_carat(class='container text-right', type='decimalnumber', name='usd_per_carat', value=params.usd_per_carat, min="0", required)
+        div.col-sm-2.label-data
+            label.control-label.mm(for='netprice_usd') သင့်ငွေ (USD)
+        div.col-sm-3.label-data
+          input.form-control#netprice_usd(class='container text-right', type='decimalnumber', name='netprice_usd', value=params.netprice_usd, min="0", required)  
+                
+      div.form-group.row       
+        div.col-sm-2.label-data
+          label.control-label.mm(for='current_usd') ဒေါ်လာဈေးနှုန်း
+        div.col-sm-3.label-data
+          input.form-control#current_usd(class='container text-right', type='number', name='current_usd', value=params.current_usd, min="0", required)
+        div.col-sm-2.label-data
+            label.control-label.mm(for='netprice_mmk') သင့်ငွေ (MMK)
+        div.col-sm-3.label-data
+          input.form-control#netprice_mmk(class='container text-right', type='decimalnumber', name='netprice_mmk', value=params.netprice_mmk, min="0", required) 
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='remark') မှတ်ချက်
+        div.col-sm-10
+          textarea.form-control.mm#remark(name='remark')= params.remark
+
+      div.form-group.row
+        div.col-sm-6.label-data
+          strong finished &nbsp;
+            input#isfinished(type="checkbox", name="isfinished", value=params.isfinished, checked=(params.isfinished == 1))
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-wholediamond').addClass('active');
+      $('div#purchase_subitems').addClass('show');
+      token = "!{token}";
+
+      var _tmp = $("#recordid").val();
+      var isfinished = $("#isfinished").val();
+      if (_tmp != "" && isfinished == 1) {
+        document.getElementById('date').setAttribute("readonly", "");
+        document.getElementById('supplier_id').setAttribute("disabled", true);
+        document.getElementById('gemtype_id').setAttribute("disabled", true);
+        document.getElementById('diamondtype_id').setAttribute("disabled", true);
+        document.getElementById('paymenttype').setAttribute("disabled", true);
+        document.getElementById('voc_no').setAttribute("readonly", "");
+        document.getElementById('wgt_carat').setAttribute("readonly", "");
+        document.getElementById('usd_per_carat').setAttribute("readonly", "");
+        document.getElementById('current_usd').setAttribute("readonly", "");
+        document.getElementById('netprice_usd').setAttribute("readonly", "");
+        document.getElementById('netprice_mmk').setAttribute("readonly", "");
+        document.getElementById('remark').setAttribute("readonly", "");
+        document.getElementById('isfinished').setAttribute("disabled", true);
+        $("#submitBtn").hide();
+      }
+      if (_tmp != "") {
+        document.getElementById('gemtype_id').setAttribute("disabled", true);
+      }
+
+      $(document).keypress(
+        function(event){
+          if (event.which == '13') {
+            event.preventDefault();
+          }
+      });
+
+      $('#supplier_id').Template({
+        "template": "<option value='${=id}'>${=name}</option>",
+        "ajax": {
+          "url": "/api/customerview/getSupplier",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "data"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#supplier_id').data('value');
+        if (selectedVal) {
+          $('#supplier_id').selectpicker('val', selectedVal);
+        }
+        $('#supplier_id').selectpicker('refresh');
+      });
+
+      $('#diamondtype_id').Template({
+        "template": "<option value='${=id}'>${=diamondtype}</option>",
+        "ajax": {
+          "url": "/api/diamondtype",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "diamondtype"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#diamondtype_id').data('value');
+        if (selectedVal) {
+          $('#diamondtype_id').selectpicker('val', selectedVal);
+        }
+        $('#diamondtype_id').selectpicker('refresh');
+      });
+
+      $('#gemtype_id').Template({
+        "template": "<option value='${=id}'>${=gemtype}</option>",
+        "ajax": {
+          "url": "/api/gemtype",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "gemtype"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#gemtype_id').data('value');
+        if (selectedVal) {
+          $('#gemtype_id').selectpicker('val', selectedVal);
+        }
+        $('#gemtype_id').selectpicker('refresh');
+      });
+
+      $("select#paymenttype").Template({
+        "template": "<option value='cash'>လက်ငင်း</option><option value='debt'>အကြွေး</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#paymenttype').data('value');
+        if (selectedVal) {
+          $("#paymenttype option[value=" + selectedVal + "]").prop('selected', true);
+          $("#paymenttype option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#paymenttype').selectpicker('refresh');
+      });
+
+      $("#qty").change(function(e) {
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter") {
+          //- var qty = $("#qty").val();
+        var wgt_carat = $("#wgt_carat").val();
+        var usd_per_carat = $("#usd_per_carat").val();
+        var current_usd = $("#current_usd").val();
+        if (wgt_carat != "" && usd_per_carat != "") {
+          var netprice_usd = wgt_carat * usd_per_carat;
+          $("#netprice_usd").val(netprice_usd.toFixed(2));
+          if (current_usd != "") {
+            var netprice_mmk = netprice_usd * current_usd;
+            $("#netprice_mmk").val(netprice_mmk.toFixed(2));
+          }
+        }          
+        //- }
+      });
+
+      $("#current_usd").change(function(e) {
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter") {
+        var current_usd = $("#current_usd").val();
+        var netprice_usd = $("#netprice_usd").val();
+        if (current_usd != "" && netprice_usd != "") {
+          var netprice_mmk = current_usd * netprice_usd;
+          $("#netprice_mmk").val(netprice_mmk.toFixed(2));
+        }
+        $("#remark").focus();
+        //- }
+      });
+
+      $("#wgt_carat").change(function(e) {
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter") {
+          //- var qty = $("#qty").val();
+        var wgt_carat = $("#wgt_carat").val();
+        var usd_per_carat = $("#usd_per_carat").val();
+        var current_usd = $("#current_usd").val();
+        if (wgt_carat != "" && usd_per_carat != "") {
+          var netprice_usd = wgt_carat * usd_per_carat;
+          $("#netprice_usd").val(netprice_usd.toFixed(2));
+          if (current_usd != "") {
+            var netprice_mmk = netprice_usd * current_usd;
+            $("#netprice_mmk").val(netprice_mmk.toFixed(2));
+          }
+        }
+        $("#usd_per_carat").focus();
+        //- }
+      });
+
+      $("#usd_per_carat").change(function(e) {
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        //- if(keycode == '13' && event.key === "Enter") {
+          //- var qty = $("#qty").val();
+        var wgt_carat = $("#wgt_carat").val();
+        var usd_per_carat = $("#usd_per_carat").val();
+        if (wgt_carat != "" && usd_per_carat != "") {
+          var netprice_usd = wgt_carat * usd_per_carat;
+          $("#netprice_usd").val(netprice_usd.toFixed(2));
+        }
+        $("#current_usd").focus();
+        //- }
+      });
+
+      if (_tmp == "") {
+        $("#gemtype_id").change(function(e) {
+          var gemtype_id = $("#gemtype_id").val();
+          $.ajax({
+            url: "/api/wholediamondview/getPrefixByGemType?gemtype_id=" + gemtype_id,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              var code = result.data.prefix + ++result.data.count;
+              $("#code").val(code);
+            }
+          });
+        });
+      }
+
+      $("#isfinished").change(function() {
+        if(this.checked) {
+          $("#isfinished").val("on");
+        } else {
+          $("#isfinished").val("");
+        }
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

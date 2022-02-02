@@ -1,0 +1,76 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span Showroom ပစ္စည်းများ
+  h1.page-header Showroom ပစ္စည်းများ
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Code
+          th Name
+          th အလေးချိန်
+          th ပဲရည်
+          th တန်ဖိုး
+          th.actions-2
+            //- a.btn.btn-success.list-action-text(href="./item/entry", role="button", title="Add")
+            //-   i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      //- var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-item').addClass('active');
+      $('div#sale_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/item?filter=is_stock,eq,1,and,is_sale,eq,0",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "item"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "code" },
+              { "data": "item_name" },
+              { "data": "wgt_gm" },
+              { "data": "goldrate" },
+              { "data": "price" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 4, render: dataTableGoldrate() },
+            { targets: 5, render: dataTablePriceWithCommas() }
+            { targets: 6, orderable: false, render: dataItemTableActionsRenderer("./item/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/item/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

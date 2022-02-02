@@ -1,0 +1,132 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/userregister") User Register
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header User Register Entry
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#users(type='hidden', name='users', value=users)
+      
+      div.text-right#user-name
+      div.form-group.row
+        label.col-sm-3.control-label.pt-2(for="username") User Name
+        div.col-sm-9 
+          input.form-control#username.mm(type='text',name='username',value=params.username, maxlength="55", required)
+
+      div.form-group.row
+        label.col-sm-3.control-label.pt-2(for='roleid') RoleGroup
+        div.col-sm-9
+          select#roleid.selectpicker.form-control(name='roleid', value=params.roleid, data-value=params.roleid, data-live-search="true", data-size="8", required)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-3.control-label.pt-2(for='password') Password
+        div.col-sm-9
+          input.form-control#password(type='password', name='password', maxlength="255", required)
+
+      div.text-right#cf-pass
+      div.form-group.row
+        label.col-sm-3.control-label.pt-2(for='password') Confirm Password
+        div.col-sm-9
+          input.form-control#confirm_password(type='password', name='confirm_password', maxlength="255", required)
+
+      div.row.justify-content-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-userregister').addClass('active');
+      $("#alert").hide();
+
+      $('select#roleid').Template({
+        "template": "<option value='${=id}'>${=role}</option>",
+        "ajax": {
+          url: "/api/user_role",
+          "headers": { "authorization": "Bearer " + token },
+          "dataSrc": "user_role"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#roleid').data('value');
+        if (selectedVal) {
+          $("#roleid option[value='" + selectedVal + "']").prop('selected', true);
+        }
+        $('#roleid').selectpicker('refresh');
+      });
+
+      $("#confirm_password").on('change keyup',function(){
+        var ori = $("#password").val();
+        var cf = $("#confirm_password").val();
+        if (ori === cf && ori.length == cf.length) $("#cf-pass").html(" * Password match!").removeClass('text-danger').addClass('text-success').show();
+        else $("#cf-pass").html(" * Password does not match!").removeClass('text-success').addClass('text-danger').show();
+      });
+
+      $("#cf-pass").hide();
+      $("#user-name").hide();
+
+      $("#username").on('change keyup',function(){
+        var ori_name = $("#users").val();
+        ori_name = JSON.parse(ori_name);
+        var new_name = $("#username").val();
+        var isExit = false;
+
+        ori_name.forEach(user => {
+          if (!isExit) {
+            if (user.username == new_name) {
+              isExit = true;
+              $("#user-name").html("Already Exist!").addClass('text-danger').show();
+            }
+          }
+        })
+        if (!isExit) {
+          $("#user-name").hide();
+        }
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

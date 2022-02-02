@@ -1,0 +1,160 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/userrole") User Role
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header User Role Entry
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#orirole(type='hidden', name='orirole', value=orirole)
+      input#items(type='hidden', name='items', value=items)
+      
+      div.row
+        div.col-md-6
+          div.text-right#user-role
+          div.row.form-group
+            label.col-sm-3.control-label.pt-2.text-right(for='role') User Role
+            div.col-sm-9
+              input.form-control#role.mm(type='text', name='role', value=params.role, required)
+        div.col-md-6
+          div.row.form-group
+            label.col-sm-3.control-label.pt-2.text-right(for='description') Description
+            div.col-sm-9
+              input.form-control#description.mm(type='text', name='description', value=params.description, required)
+      hr
+      div.row
+        div.form-group.col-sm-12
+          div.row
+            label.col-sm-2.control-label(for='program') 
+              strong Program List
+            div.col-sm-10
+              label.btn.btn-secondary.float-right.mr-4(role="button")
+                strong Select All &nbsp;
+                input#select_all(type="checkbox", name="select_all", checked=(params.selectall == 1))
+          ul.list-group.nowrap#list
+          if (items.length > 0)
+            each item in items
+              li.row.list-group-item(style="padding-top:3px;padding-bottom:3px;")
+                input(type='hidden', name='roleid', value=params.id)
+                input(type='hidden', name='programid', value=item.id)
+                label.control-label.col-sm-8.text-left.pl-5
+                  strong #{item.name} 
+                  | (Access Permisions)
+                div.col-sm-4.btn-group.pt-2.align-self-center(role="group")
+                  label.btn.btn-secondary(role="button")
+                    input.check(type="checkbox", name="read_" + item.id, aria-label="chkRead", checked=(item.read == 1 || item.read == null))
+                    | &nbsp; Read
+                  label.btn.btn-info(role="button")
+                    input.pt-2.check(type="checkbox", name="write_" + item.id, aria-label="chkWrite", checked=(item.write == 1 ))
+                    | &nbsp; Write
+                  if item.isdetail == 0
+                    label.btn.btn-danger(role="button")
+                      input.pt-2.check(type="checkbox", name="delete_" + item.id, aria-label="chkDelete", checked=(item.delete == 1))
+                      | &nbsp; Delete
+                div.clearfix
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#actionSubmit(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-userrole').addClass('active');
+      $("#alert").hide();
+      $("#user-role").hide();
+
+      $('#select_all').change(function() {
+        const items = JSON.parse($("#items").val());
+        if(this.checked) {
+          items.forEach((item) => {
+            item.read = 1;
+            item.write = 1;
+            item.delete = 1;
+
+            var clicked = true;
+            $(".check").prop("checked", clicked);
+          });
+        } else {
+          items.forEach((item) => {
+            item.read = 0;
+            item.write = 0;
+            item.delete = 0;
+
+            var clicked = false;
+            $(".check").prop("checked", clicked);
+          });
+        }
+      });
+
+      $(".check").on("click", function() {
+        if(!this.checked) {
+          $("#select_all").prop("checked", false);
+        }
+      });
+      
+      $("#role").on('change keyup',function(){
+        var orirole = $("#orirole").val();
+        var orirole = JSON.parse(orirole);
+        var role = $("#role").val();
+        var isExit = false;
+        orirole.forEach(ori_role => {
+          if (!isExit) {
+            if (ori_role.role == role) {
+              isExit = true;
+              $("#user-role").html("Already Exist!").addClass('text-danger').show();
+            }
+          }
+        })
+        if (!isExit) {
+          $("#user-role").hide();
+        }
+      });
+
+      $("#actionSubmit").click(function() {
+        $("#actionSubmit").setAttribute("disabled", "");
+      });
+
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $(window).scrollTop(0);
+            $("#actionSubmit").attr('disabled',true);
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").removeClass("alert-danger").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $(window).scrollTop(0);
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

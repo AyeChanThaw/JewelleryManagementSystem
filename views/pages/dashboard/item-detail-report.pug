@@ -1,0 +1,140 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm အထည်ချစာရင်း
+  h1.page-header.mm အထည်ချစာရင်း
+
+  form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+    div.form-group.row
+        label.col-sm-2.control-label(for='startdate') From Date
+        div.col-sm-10
+          input.form-control.fromdate#start.mm(type='text', name='start', required)
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='enddate') To Date
+      div.col-sm-10
+        input.form-control.todate#end.mm(type='text', name='end', required)
+
+    div.row.justify-content-center.form-actions
+      button.btn.btn-primary#loadBtn(type='button', role='button') Load
+
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Date
+          th Image
+          th Code
+          th Name
+          th.mm အမျိုးအစား
+          th.mm အလေးချိန်
+          th Grade
+          th.mm စိန်ပွင့်ရေ
+          th.mm ပဲရည်
+          th.mm ရောင်းဈေး
+      tbody
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-item-report').addClass('active');
+      $('div#report_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+
+      let current = new Date();
+      let month = current.getMonth() + 1;
+      const year = current.getFullYear();
+      let day = current.getDate();
+      if (month < 10)
+        month = "0" + month;
+      if (day < 10)
+        day = "0" + day;
+
+      const showcurrent = day + "/" + month + "/" + year;
+      const showstart = "01/" + month + "/" + year;
+      $("#start").val(showstart);
+      $("#end").val(showcurrent);
+      reload(showstart, showcurrent);
+
+      $("#loadBtn").on('click', function(event){
+        reload($("#start").val(), $("#end").val());
+      });
+
+      function reload(start, end) {
+        var table = $('table#list').DataTable({
+          destroy: true,
+          autoWidth: true,
+          ajax: { 
+            "url": "/api/reportview/getItemDetailReport?start="+start+"&end="+end,
+            "type": "GET",
+            "headers": {"authorization": "Bearer " + token}
+          },
+          columns: [
+            { "data": "id" },
+            { "data": "date" },
+            { "data": "image" },
+            { "data": "code" },
+            { "data": "item_name" },
+            { "data": "category_name" },
+            { "data": "wgt_gm" },
+            { "data": "grade" },
+            { "data": "diamond_qty" },
+            { "data": "goldrate" },
+            { "data": "price" }
+          ],
+          "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            /* Append the grade to the default row class name */
+            if ( aData.status == "expired" )
+            {
+                $("td", nRow).css("background-color", "rgb(83 111 230)");
+            }
+          },
+          columnDefs: [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 2, render: dataTableImageRenderer() },
+            { targets: 9, render: dataTableGoldrate() },
+            { targets: 10, render: dataTablePriceWithCommas() }
+          ],
+          lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+          dom:  "<'row'<'col-sm-12 col-md-12 mb-1'B>>" +
+                "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+          buttons: [
+            {
+              extend: 'excel',
+              text: 'Excel',
+              charset: 'utf-8',
+              className: 'success-excel',
+              filename: 'အထည်ချစာရင်း',
+              customize: function(xlsx) {
+                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                $('row c[r^="G"]', sheet).each( function () {
+                  var numero=$(this).parent().index() + 1 ;
+                  if ($(this).text() == 'expired') {
+                    $('row c[r*="'+numero+'"]', sheet).attr('s', '45');
+                  }
+                })
+              },
+              exportOptions: {
+                columns: [ 0, 1, 3, 4, 5, 6, 7, 8, 9 ],
+              },
+              title: 'အထည်ချစာရင်း',
+            }
+          ]
+        });
+
+        return table;
+      }
+
+    });

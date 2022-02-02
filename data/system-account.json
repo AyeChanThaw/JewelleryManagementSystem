@@ -1,0 +1,12 @@
+{
+  "users": [{
+    "id": 0,
+    "usertype": "system",
+    "username": "admin",
+    "password": "4441E5D70B3657900FA57E66DB407E0B"
+  }],
+  "clients": [
+    { "clientId": "web", "clientSecret": "66C249677DE983AAD7A717EB5C164FA1", "redirectUris": ["/webapi"] }
+  ],
+  "tokens": []
+}

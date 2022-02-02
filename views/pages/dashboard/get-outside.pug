@@ -1,0 +1,78 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm အပြင် ပန်းတိမ်အပ်
+  h1.page-header-mm အပြင် ပန်းတိမ်အပ်
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th.mm ဓာတ်ပုံ
+          th.mm ပစ္စည်းအမည်
+          th Code
+          th.mm အလေးချိန်
+          th.mm ပန်းထိမ်ဆရာ
+          th.actions-4
+            a.btn.btn-success.list-action-text(href="./get-outside/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-get-outside').addClass('active');
+      $('div#production_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": {
+            "url": "/api/giveoutsideview/giveOutside",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "date" },
+              { "data": "image" },
+              { "data": "item_name" },
+              { "data": "code" },
+              { "data": "return_wgt_gm" },
+              { "data": "goldsmith_name" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 2, render: dataTableImageRenderer() },
+            { targets: 7, orderable: false, render: dataTableGetOutsideActionsRenderer("./get-outside/edit", "./polish/entry", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/get-outside/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

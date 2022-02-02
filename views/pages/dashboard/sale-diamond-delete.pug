@@ -1,0 +1,52 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm ဖျက်ထားသော အရောင်း(စိန်)
+  h1.page-header-mm ဖျက်ထားသော အရောင်း(စိန်)
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th.mm User
+          th.mm အရောင်းဘောက်ချာ
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-sale-diamond-delete').addClass('active');
+      $('div#sale_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": {
+            "url": "/api/sale_diamond?columns=sale_diamond.*,user.username&filter=is_delete,eq,1&join=left,user,deleted_user_id,eq,user.id",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "sale_diamond"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "deleted_date" },
+              { "data": "user_name" },
+              { "data": "voc_no" },
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 2, render: dataTableDeleteUser() },
+          ]
+      });
+
+    });

@@ -1,0 +1,171 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span နေ့စဉ်အဝင်စာရင်း
+  h1.page-header-mm.mm နေ့စဉ်အဝင်စာရင်း
+  include ../../includes/delete-confirm
+  div.progress.mb-1#progress
+    div.progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar', aria-valuenow='100', aria-valuemin="0", aria-valuemax="100", style="width: 100%")
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th နေ့စဉ်အဝင်စာရင်း အမျိုးအစား
+          th Title
+          th Amount
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./daily-cash-in-showroom/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  div.modal.fade#modalReply(tabindex="-1", role="dialog")
+    div.modal-dialog.modal-xl(role="document")
+      div.modal-content
+        div.modal-header
+          h4.modal-title နေ့စဉ်အဝင်စာရင်း Import
+          button.close#btnClose(type="button", data-dismiss="modal", aria-label="Close")
+            span(aria-hidden="true") &times;
+        div.modal-body
+          form.form-horizontal#entryForm(method='POST', enctype="multipart/form-data", action='/file/cashinsrimport/import')
+
+            div.form-group.row
+              label.col-sm-2.control-label(for='import') အဝင်စာရင်း Import
+              div.col-sm-8
+                input.form-control#excel(type='file', name='file',  accept='.xls,.xlsx,.csv', change="changeEvent($event)")
+
+              div.col-sm-2.sample
+                div.sample-btn
+                  a(href=`https://drive.google.com/file/d/18kq8L8QRLypDiPUD5F_7c8phJfNPp4Wa/view?ts=60e869f8`, alt="sample", target=`_blank`, title=`sample`) Sample File
+               
+            div.row.justify-content-md-center.form-actions
+              button.btn.btn-primary#submit(type='submit', data-dismiss="modal") Save
+              button.btn.btn-secondary#btnCancel(type='button', role='button') Cancel
+              //- a.btn.btn-secondary#btnCancel(href=tableimport, role='button') Cancel
+
+          form#postSuccessForm(method='GET', action='bundleimport')
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-daily-cash-in-showroom').addClass('active');
+      $('div#cashinout_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+      $("#progress").hide();
+
+      var submitBtn = document.getElementById("submit");
+      submitBtn.setAttribute("disabled", "");
+      $.fn.dataTable.ext.errMode = 'none';
+      reload();
+      function reload() {
+        var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          //- "serverSide": true,
+          "processing": true,
+          "destroy": true,
+          "ajax": { 
+            "url": "/api/daily_cash_in_showroom?columns=daily_cash_in_showroom.id,daily_cash_in_showroom.title,daily_cash_in_showroom.total_amount,daily_cash_in_type.type&join=left,daily_cash_in_type,daily_cash_in_type_id,eq,daily_cash_in_type.id",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "daily_cash_in_showroom"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "type" },
+              { "data": "title" },
+              { "data": "total_amount" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 3, render: dataTableTotalAmtWithCommas() },
+            { targets: 4, orderable: false, render: dataTableActionsRenderer("./daily-cash-in-showroom/edit", "#{permission.access}") }
+          ],
+          dom: "<'row'<'col-12'B>>" +
+                "<'row'<'col-6'l><'col-6'f>>" +
+                "<'row'<'col-12'tr>>" +
+                "<'row'<'col-5'i><'col-7'p>>",
+          buttons: [
+            {
+              text: 'Import',
+              className: 'success-import',
+              action: function ( e, dt, node, config ) {
+                $('#modalReply').modal('show');
+              }
+            }
+          ]
+        });
+        return table;
+      }
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/daily-cash-in-showroom/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+
+      $("#excel").on('change', function (event) {
+        if($('#excel').val() != "")
+          submitBtn.removeAttribute("disabled");
+      });
+
+      $("#submit").on('click', function(ev) {
+        if($('#excel').val() != "")
+          $("#progress").show()
+        $("#upload:hidden").on('change', function(){
+          $('#entryForm').submit();
+        });
+        $('#modalReply').modal('toggle');
+      });
+
+      $("#btnCancel").on('click', function(ev) {
+        $('#excel').val("");
+        submitBtn.setAttribute("disabled", "");
+      });
+
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          console.log("data ", data);
+          if (data.message == "success") {
+            console.log("Data Success and Reload");
+            reload();
+            $("#progress").hide()
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Importing Successful!");
+            $("#alert").addClass("alert-success").show();
+            $('#excel').val("");
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              //- postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Importing Error!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

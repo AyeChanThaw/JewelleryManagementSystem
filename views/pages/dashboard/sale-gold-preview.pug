@@ -1,0 +1,184 @@
+doctype html
+html
+    head
+        meta(charset='utf-8')
+        meta(content='IE=edge', http-equiv='X-UA-Compatible')
+        meta(content='width=device-width,initial-scale=1', name='viewport')
+        title= title
+        style.
+            #table {
+                width: 100%; 
+                border-collapse: collapse;
+            }
+            th,td {
+                padding: 10px;
+            }
+        
+        link(rel="shortcut icon", href="/img/dia_favicon.png")
+        link(rel='stylesheet', href='/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/css/fontawesome-all.min.css')
+        link(rel='stylesheet', href='/css/datatables.css')
+        link(rel='stylesheet', href='/css/datatables.custom.css')
+        link(rel='stylesheet', href='/css/bootstrap-datepicker.standalone.css')
+        link(rel='stylesheet', href='/css/bootstrap-select.css')
+        link(rel='stylesheet', href='/css/fonts.css')
+        link(rel='stylesheet', href='/css/dashboard.css')
+        link(rel='stylesheet', href='/css/style.css')
+        link(rel='stylesheet', href='/css/buttons.dataTables.min.css')
+        
+        // Chart.js
+        link(rel='stylesheet', href='/css/Chart.css')
+        link(rel='stylesheet', href='/css/Chart.min.css')
+        link(rel='stylesheet', href='/css/jquery-ui.css')
+
+
+        script(src='/js/jquery-3.3.1.min.js')
+        script(src='/js/date-and-time.min.js')
+        script(src='/js/purl.min.js')
+        script(src='/js/popper.min.js')
+        script(src='/js/bootstrap.min.js')
+        script(src='/js/datatables.min.js')
+        script(src='/js/datatables.render.date.js')
+        script(src='/js/bootstrap-datepicker.js')
+        script(src='/js/bootstrap-select.js')
+        script(src='/js/jquery.template.js')
+        script(src='/js/jquery.form.min.js')
+        script(src='/js/jquery.validate.min.js')
+        script(src='/js/dataTables.buttons.min.js')
+        script(src='/js/buttons.html5.min.js')
+        script(src='/js/buttons.flash.min.js')
+        // Chart.js
+        //- script(src='/js/Chart.bundle.js')
+        script(src='/js/Chart.bundle.min.js')
+        script(src='/js/Chart.js')
+        script(src='/js/Chart.min.js')
+        script(src='/js/jquery-autocomplete.min.js')
+        //- script(src="print.js")
+block content   
+
+    div.col-md-offset-4.form-actions
+        div.row.justify-content-center.form-actions
+            button.btn.btn-primary#print(type="button") Print
+            a.btn.btn-secondary#actionBack(href="/sale-gold", role='button') Back 
+
+    br
+    
+    form#postSuccessForm(method='GET', action="/sale-gold-customer-preview")
+        input#rowid(type="hidden", name="id", value=params.id)
+        div.printcontainer
+            div.table-responsive.printpadding
+                h5.page-header.text-center
+                    b Sale Gold Preview
+                br
+                br
+                table.print#table
+                    thead
+                        tr
+                            td(style="width:13%;") Voucher No.
+                            td.text-left(style="width:40%;")
+                                strong=params.voc_no
+                            td.mm(style="width:13%;") နေ့စွဲ 
+                            td.text-left.number(style="width:40%;")=params.date
+                        tr
+                            td.mm(style="width:16%;") ဝယ်သူID
+                            td.text-left.mm(style="width:40%;")=params.customer_code
+                            td.mm(style="width:16%;") ဝယ်သူအမည်
+                            td.text-left.mm(style="width:40%;")=params.customer_name
+                        tr
+                            td.mm(style="width:13%;") ဖုန်းနံပါတ်
+                            td.text-left.number(style="width:40%;")=params.phone
+                            td.mm(style="width:13%;") ရောင်းသူအမည်
+                            td.text-left.mm(style="width:50%;")=params.sale_person_name
+                        tr
+                            td(style="width:13%;") Printed Date
+                            td.text-left.number(style="width:40%;")=params.print_date
+
+                br
+                table.print#table
+                    thead
+                        tr
+                            th.border(style="width:4%;") No
+                            th.border(style="width:10%;") Photo
+                            th.border(style="width:40%;") Wearing Name
+                            th.border(style="width:13%;") Price
+                            th.border(style="width:13%;") Weight
+                            th.border(style="width:20%;") Sub Total
+                        
+                    tbody#tbodysalelist
+                        input#item_array(type='hidden', name='item_array', value=item_array)
+
+                        each detail, index in item_array
+                            tr
+                                td.border.text-center.border.mm
+                                    span=index+1
+                                td.border.text-center.mm
+                                    if detail.image == ""
+                                        //- img.thumbnail.img-responsive-preview(src="/file/stream?file=" + detail.image, alt="Image")
+                                    else
+                                        img.thumbnail.img-responsive-preview(src="/file/stream?file=" + detail.image, alt="Image", width="80px", height="80px")
+                                td.border.text-left.mm 
+                                    //- border: 1px solid; 
+                                    //- span.mm=detail.barcode
+                                    span.mm=detail.item_name
+                                td.border.text-left
+                                    //- border: 1px solid; 
+                                    span=detail.price
+                                td.border
+                                    span=detail.wgt_gm 
+                                td.border.number
+                                    span=detail.price
+                        tr
+                            td.border(colspan="5") Sub Total
+                            td.border 
+                                span=params.total_amount
+                        tr
+                            td.border.mm(colspan="5") ကျသင့်ငွေ
+                            td.border 
+                                span=params.total_amount
+                        tr
+                            td.border.mm(colspan="5") စရံငွေ
+                            td.border 
+                                span=params.order_total_amount
+                        tr
+                            td.border.mm(colspan="5") Discount
+                            td.border 
+                                span=params.discount_amount
+                        tr
+                            td.border.mm(colspan="5") ပေးငွေ
+                            td.border 
+                                span=params.payment_amount
+                        tr
+                            td.border.mm(colspan="5") ကျန်ငွေ
+                            td.border
+                                span=params.debt_amount
+                br
+                br
+                br
+                div.row.print#table
+                    div.col-sm-6.text-left
+                        span Received By
+                    div.col-sm-6.text-right
+                        span Checked By
+                br
+                div.row.print#table
+                    div.col-sm-6.text-left
+                        span ------------
+                    div.col-sm-6.text-right
+                        span ------------
+
+    script.
+        $(document).ready(function() {
+            var access = ("#{permission.access}").split(",");
+            if (access[1] != "1") $("#actionReply").hide();
+            var id = $("#rowid").val();
+            $("#print").on('click',function(){
+                $("#print").hide();
+                $("#actionBack").hide();
+                $("#title").hide();
+                window.print();
+                $("#print").show();
+                $("#actionBack").show();
+                $("#title").show();
+            });
+
+        });

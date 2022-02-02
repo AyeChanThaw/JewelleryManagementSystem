@@ -1,0 +1,42 @@
+div.modal.fade#dialogGoldDeliverConfirm(tabindex='-1', role='dialog', aria-labelledby='goldDeliverConfirm')
+  div.modal-dialog.modal-lg(role='document')
+    div.modal-content
+      form.form-detail#entryForm(method='post', action=`${postUrl}`)
+        input#id(type='hidden', name='id')
+        div.modal-header
+          h4.modal-title Deliver
+        div.modal-body        
+          div.form-group.row.delivery-form
+            label.col-sm-4.control-label.mm(for='description') အကြောင်းအရာ
+            div.col-sm-8
+              textarea.form-control.mm#description(name='description')
+              
+        div.modal-footer
+          button.btn.btn-secondary#dialogCancel(type='button', data-dismiss='modal') Close
+          button.btn.btn-primary#dialogAccept(type='submit', role='button', data-dismiss='modal') Save
+          //- button.btn.btn-primary#dialogAccept(type='button', data-dismiss='modal') Save
+      form#postSuccessForm(method='GET', action=listUrl)
+//- script.
+//-   $(document).ready(function() {
+//-     var token = "!{token}";
+//-     console.log("token ", token);
+//-     $('#dialogGoldDeliverConfirm').on('show.bs.modal', function (event) {
+//-         var button = $(event.relatedTarget);
+//-         var id = button.data('id');
+//-         $("#id").val(id);
+//-         console.log("id ", id);
+//-         //- var saleId = $('#saleid').val();
+//-         //- console.log("saleId in 1 ", saleId);
+//-         $(this).attr('data-id', id);
+//-         $(this).find('#dialogAccept').on('click', function(ev) {
+//-           var postUrl = '/sale-gold/deliver/' + id;
+//-           doSave(postUrl, token, $('#entryForm').serialize(), function() {
+//-             console.log("do save success");
+//-             table.ajax.reload();
+//-           });
+//-         });
+//-       }).on('hide.bs.modal', function (event) {
+//-         $(this).attr('data-id', '');
+//-         $(this).find('#dialogAccept').off('click');
+//-       });
+//-   });

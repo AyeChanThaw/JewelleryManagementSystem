@@ -1,0 +1,405 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/item-dataentry") Item Data Entry
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm Item Data Entry
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-3
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+        div.col-sm-2.label-data
+          label.control-label.mm(for='code') Code
+        div.col-sm-3
+          input.form-control#code(type='text', name='code', value=params.code, required)
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='item_name') ပစ္စည်းအမည်
+        div.col-sm-3
+          input.form-control#item_name(type='text', name='item_name', value=params.item_name, required)
+        div.col-sm-2.label-data
+          label.control-label(for='price') တန်ဖိုး
+        div.col-sm-3
+          input.form-control.model-stock-code#price(class='container text-right', type='number', min="0", name='price', value=params.price, maxlength="55", required)
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='category_id') အမျိုးအစား
+        div.col-sm-3
+          select#category_id.selectpicker.form-control(name='category_id', value=params.category_id, data-value=params.category_id, data-live-search="false", data-size="20", readonly)
+            option(value="") [Select one]
+        div.col-sm-2.label-data
+          label.control-label(for='status') Type
+        div.col-sm-3
+          select#status.selectpicker.form-control(name='status', value=params.status, data-value=params.status, data-live-search="false", data-size="20", required)
+            option(value="") [Select One]
+            option(value="diamond") Diamond
+            option(value="gold") Gold
+            option(value="pt") Platinum
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label.mm(for='wgt_gm') အလေးချိန်
+        div.col-sm-2
+          div.row
+            div.col-sm-8
+              input.form-control#wgt_gm(class='kpy_keypress container text-right', type='decimal', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='wgt_gm') gram
+        div.col-sm-2.gold-form
+          div.row
+            div.col-sm-8
+              input.form-control#wgt_k(class='kpy_keypress container text-right', type='number', min="0", name='wgt_k', value=params.wgt_k, maxlength="55", readonly)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='wgt_k') ကျပ်
+        div.col-sm-2.gold-form
+          div.row
+            div.col-sm-8
+              input.form-control#wgt_p(class='kpy_keypress container text-right', type='number', min="0", name='wgt_p', value=params.wgt_p, maxlength="55", readonly)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='wgt_p') ပဲ
+        div.col-sm-2.gold-form
+          div.row
+            div.col-sm-8
+              input.form-control#wgt_y(class='kpy_keypress container text-right', type='decimalnumber', min="0", name='wgt_y', value=params.wgt_y, maxlength="55", readonly)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='wgt_y') ရွေး
+
+      div.form-group.row.gold-form
+        div.col-sm-2.label-data
+          label.control-label.mm(for='reduce_wgt_gm') အလျော့
+        div.col-sm-2
+          div.row
+            div.col-sm-8
+              input.form-control#reduce_wgt_gm(class='kpy_keypress container text-right', type='decimal', min="0", name='reduce_wgt_gm', value=params.reduce_wgt_gm, maxlength="55")
+            div.col-sm-3.label-data
+              label.control-label.mm(for='reduce_wgt_gm') gram
+        div.col-sm-2.gold-form
+          div.row
+            div.col-sm-8
+              input.form-control#reduce_wgt_k(class='container text-right', type='number', min="0", name='reduce_wgt_k', value=params.reduce_wgt_k, maxlength="55", readonly)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='reduce_wgt_k') ကျပ်
+        div.col-sm-2.gold-form
+          div.row
+            div.col-sm-8
+              input.form-control#reduce_wgt_p(class='container text-right', type='number', min="0", name='reduce_wgt_p', value=params.reduce_wgt_p, maxlength="55", readonly)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='reduce_wgt_p') ပဲ
+        div.col-sm-2.gold-form
+          div.row
+            div.col-sm-8
+              input.form-control#reduce_wgt_y(class='container text-right', type='decimalnumber', min="0", name='reduce_wgt_y', value=params.reduce_wgt_y, maxlength="55", readonly)
+            div.col-sm-3.label-data
+              label.control-label.mm(for='reduce_wgt_y') ရွေး
+
+
+      div.form-group.row.diamond
+        div.col-sm-2.label-data
+          label.control-label(for='wgt_ct') စိန် အလေးချိန်
+        div.col-sm-3
+          input.form-control#wgt_ct(class='container text-right', type='decimalnumber', min="0", name='wgt_ct', value=params.wgt_ct, maxlength="55")
+        div.col-sm-2.label-data
+          label.control-label(for='diamond_qty') စိန် အရေတွက်
+        div.col-sm-3
+          input.form-control#diamond_qty(class='container text-right', type='decimalnumber', min="0", name='diamond_qty', value=params.diamond_qty, maxlength="55")
+
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='branch_id') Branch
+        div.col-sm-3
+          select#branch_id.selectpicker.form-control(name='branch_id', value=params.branch_id, data-value=params.branch_id, data-live-search="false", data-size="20", readonly)
+            option(value="") [Select one]
+        div.col-sm-2.label-data
+          label.control-label(for='grade_id') Grade
+        div.col-sm-3
+          select#grade_id.selectpicker.form-control(name='grade_id', value=params.grade_id, data-value=params.grade_id, data-live-search="false", data-size="20", readonly)
+            option(value="") [Select one]
+    
+      div.form-group.row.gold-form
+        div.col-sm-2
+          label.control-label(for='goldrate') ပဲရည်
+        div.col-sm-3
+          select#goldrate.selectpicker.form-control(name='goldrate', value=params.goldrate, data-value=params.goldrate, data-live-search="false", data-size="8")
+            option(value="") [Select one]
+            option(value="a") ၁၆ ပဲရည်
+            option(value="b") ၁၅ ပဲရည်
+            option(value="c") ၁၄ ပဲရည်
+            option(value="d") ၁၃ ပဲရည်
+
+      div.form-group.row
+        label.col-sm-2.control-label(for="") ဓာတ်ပုံ
+
+        div.col-sm-3
+          div.form-image#imgContainer
+            div.image-add-continer
+              button.btn.btn-light.image-add#btnImgAdd(type="button")
+                span.fa.fa-plus(aria-hidden= true)
+            div.image-preview-container
+              input#image(type="hidden", name="image", value=params.image)
+              img.form-image-preview.image-preview
+              div.image-delete-container
+                a.image-delete(title='Remove')
+                  i.fa.fa-trash
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script(src='/js/upload.js')
+  script(src='/js/scripts-upload.js')
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-item-dataentry').addClass('active');
+      $('div#dataentry_subitems').addClass('show');
+
+      var _tmp = $("#recordid").val();
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+      var status = "!{params.status}";
+      if (status == "diamond") {
+        $(".diamond").show();
+        $(".gold-form").hide();
+      } else {
+        $(".diamond").hide();
+        $(".gold-form").show();
+      }
+
+      $("select#goldrate").Template({
+        "template": "<option value='a'>၁၆ ပဲရည်</option><option value='b'>၁၅ ပဲရည်</option><option value='c'>၁၄ ပဲရည်</option><option value='d'>၁၃ ပဲရည်</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#goldrate').data('value');
+        if (selectedVal) {
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#goldrate').selectpicker('refresh');
+      });
+
+      $("select#status").Template({
+        "template": "<option value='diamond'>Diamond</option><option value='gold'>Gold</option><option value='pt'>Platinum</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#status').data('value');
+        if (selectedVal) {
+          $("#status option[value=" + selectedVal + "]").prop('selected', true);
+          $("#status option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#status').selectpicker('refresh');
+      });
+
+      $('#category_id').Template({
+        "template": "<option value='${=id}'>${=category_name}</option>",
+        "ajax": {
+          "url": "/api/category",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "category"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#category_id').data('value');
+        if (selectedVal) {
+          $('#category_id').selectpicker('val', selectedVal);
+        }
+        $('#category_id').selectpicker('refresh');
+      });
+
+      $('#grade_id').Template({
+        "template": "<option value='${=id}'>${=grade_name}</option>",
+        "ajax": {
+          "url": "/api/grade",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "grade"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#grade_id').data('value');
+        if (selectedVal) {
+          $('#grade_id').selectpicker('val', selectedVal);
+        }
+        $('#grade_id').selectpicker('refresh');
+      });
+
+      $('#branch_id').Template({
+        "template": "<option value='${=id}'>${=branch_name}</option>",
+        "ajax": {
+          "url": "/api/branch",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "branch"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#branch_id').data('value');
+        if (selectedVal) {
+          $('#branch_id').selectpicker('val', selectedVal);
+        }
+        $('#branch_id').selectpicker('refresh');
+      });
+
+      $("#status").change(function (event) {
+        if ($("#status").val() == "diamond") {
+          $(".diamond").show();
+          $(".gold-form").hide();
+          $("#wgt_k").val(0);
+          $("#wgt_p").val(0);
+          $("#wgt_y").val(0);
+          $("#goldrate").val("");
+        } else if ($("#status").val() == "pt") {
+          $(".diamond").hide();
+          $(".gold-form").hide();
+          $("#wgt_k").val(0);
+          $("#wgt_p").val(0);
+          $("#wgt_y").val(0);
+          $("#goldrate").val("");
+          $("#diamond_qty").val(0);
+          $("#wgt_ct").val(0);
+        } else {
+          $(".gold-form").show();
+          $(".diamond").hide();
+          $("#diamond_qty").val(0);
+          $("#wgt_ct").val(0);
+        }
+      });
+
+      $("#wgt_gm").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        $status = $("#status").val();
+        //- if(keycode == '13' && event.key === "Enter" && $status == 'gold')
+        if ($status == "gold")
+        {
+          console.log("wgt gm Enter");
+          $("#wgt_k").val("");
+          $("#wgt_p").val("");
+          $("#wgt_y").val("");
+
+          var CurrentGm = $("#wgt_gm").val();
+          var wgt_gm = parseFloat(CurrentGm);
+
+          $.ajax({
+            url: "/services/ChangeGmToKPY?Gm=" + wgt_gm.toString(),        
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              var _tmpkpy = result.data;
+              var _kpy = [];
+              _kpy = _tmpkpy.toString().split("-");
+              if(_kpy.length > 1){
+                $("#wgt_k").val(_kpy[0].toString());
+                $("#wgt_p").val(_kpy[1].toString());
+                $("#wgt_y").val(_kpy[2].toString());
+              } else {
+                $("#wgt_k").val(0);
+                $("#wgt_p").val(0);
+                $("#wgt_y").val(0);
+              }              
+            }
+          });
+        }
+      });
+
+      $("#reduce_wgt_gm").change(function(e){
+        //- var keycode = (event.keyCode ? event.keyCode : event.which);
+        $status = $("#status").val();
+        //- if(keycode == '13' && event.key === "Enter" && $status == 'gold')
+        if ($status == "gold")
+        {
+          console.log("reduce wgt gm Enter");
+          $("#reduce_wgt_k").val("");
+          $("#reduce_wgt_p").val("");
+          $("#reduce_wgt_y").val("");
+
+          var CurrentGm = $("#reduce_wgt_gm").val();
+          var reduce_wgt_gm = parseFloat(CurrentGm);
+
+          $.ajax({
+            url: "/services/ChangeGmToKPY?Gm=" + reduce_wgt_gm.toString(),
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              var _tmpkpy = result.data;
+              var _kpy = [];
+              _kpy = _tmpkpy.toString().split("-");
+              if(_kpy.length > 1){
+                $("#reduce_wgt_k").val(_kpy[0].toString());
+                $("#reduce_wgt_p").val(_kpy[1].toString());
+                $("#reduce_wgt_y").val(_kpy[2].toString());
+              } else {
+                $("#reduce_wgt_k").val(0);
+                $("#reduce_wgt_p").val(0);
+                $("#reduce_wgt_y").val(0);
+              }              
+            }
+          });
+        }
+      });
+
+      $('a.image-delete').on('click', function(ev) {
+        if (confirm('Are you sure to remove this image?')) {
+          $("#image").val('');
+          $('img.image-preview').attr('src', '');
+          $('.image-add-continer').show();
+          $('.image-preview-container').hide();
+        }
+      });
+      imageUpload('#imgContainer', '#image', 'item');
+
+      $("#submitBtn").click(function() {
+        //- $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+    });

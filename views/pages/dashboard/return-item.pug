@@ -1,0 +1,111 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm ပြန်သွင်းထည်
+  h1.mm.page-header-mm ပြန်သွင်းထည်
+  include ../../includes/give-goldsmith-confirm
+  include ../../includes/polish-confirm
+  include ../../includes/boil-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Code
+          th.mm အလေးချိန်(gram)
+          th.mm ကျပ်
+          th.mm ပဲ
+          th.mm ရွေး
+          th.mm တန်ဖိုး
+          th.mm အမျိုးအစား
+          th.actions-3
+            //- a.btn.btn-success.list-action-text(href="./wholediamond/entry", role="button", title="Add")
+            //-   i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-return-items').addClass('active');
+      $('div#returnproduction_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/itemview/getReturnItem",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "code" },
+              { "data": "wgt_gm" },
+              { "data": "wgt_k" },
+              { "data": "wgt_p" },
+              { "data": "wgt_y" },
+              { "data": "price" },
+              { "data": "type" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 6, render: dataTablePriceWithCommas() },
+            { targets: 8, orderable: false, render: dataTableReturnActionsRenderer("#{permission.access}") }
+          ]
+      });
+
+      $('#dialogGiveGoldsmithConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var addUrl = '/return-items/goldsmith/' + id;
+          doGoldsmith(addUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+
+      $('#dialogPolishConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var addUrl = '/return-items/polish/' + id;
+          doPolish(addUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+
+      $('#dialogBoilConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var addUrl = '/return-items/boil/' + id;
+          doBoil(addUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

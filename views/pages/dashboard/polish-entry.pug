@@ -1,0 +1,214 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/polish") အရောင်တင်
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm အရောင်တင်
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#get_diamond_id(type='hidden', name='get_diamond_id', value=params.get_diamond_id)
+      input#get_goldsmith_id(type='hidden', name='get_goldsmith_id', value=params.get_goldsmith_id)
+      input#get_outside_id(type='hidden', name='get_outside_id', value=params.get_outside_id)
+      input#goldsmith_code_id(type='hidden', name='goldsmith_code_id', value=params.goldsmith_code_id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='polisher_id') အရောင်တင်
+        div.col-sm-10
+          select#polisher_id.selectpicker.form-control(name='polisher_id', value=params.polisher_id, data-value=params.polisher_id, data-live-search="false", data-size="20", readonly)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='item_id') ပစ္စည်းအမည်
+        div.col-sm-10
+          select#item_id.selectpicker.form-control(name='item_id', value=params.item_id, data-value=params.item_id, data-live-search="false", data-size="20", readonly)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='pay_wgt_gm') အလေးချိန်
+        div.col-sm-10
+            input.form-control.model-stock-code#pay_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='pay_wgt_gm', value=params.pay_wgt_gm, maxlength="55", readonly)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='wgt_gm') ပြန်အပ် အလေးချိန်
+        div.col-sm-10
+            input.form-control.model-stock-code#wgt_gm(class='container text-right', type='decimalnumber', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='reduce_wgt_gm') အလျော့
+        div.col-sm-10
+          input.form-control.model-stock-code#reduce_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='reduce_wgt_gm', value=params.reduce_wgt_gm, maxlength="55")
+
+      div.form-group.row
+        label.col-sm-2.control-label(for="") ဓာတ်ပုံ
+
+        div.col-sm-3
+          div.form-image#imgContainer
+            div.image-add-continer
+              button.btn.btn-light.image-add#btnImgAdd(type="button")
+                span.fa.fa-plus(aria-hidden= true)
+            div.image-preview-container
+              input#image(type="hidden", name="image", value=params.image)
+              img.form-image-preview.image-preview
+              div.image-delete-container
+                a.image-delete(title='Remove')
+                  i.fa.fa-trash
+
+      div.form-group.row
+        div.col-sm-6.label-data
+          strong finished &nbsp;
+            input#isfinished(type="checkbox", name="isfinished", value=params.isfinished, checked=(params.isfinished == 1))
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+
+  script(src='/js/upload.js')
+  script(src='/js/scripts-upload.js')
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      var total_of_give = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-polish').addClass('active');
+      $('div#production_subitems').addClass('show');
+      $("#check-reduce").hide();
+
+      var _tmp = $("#recordid").val();
+      var isfinished = $("#isfinished").val();
+      if (_tmp != "" && isfinished == 1) {
+        document.getElementById('date').setAttribute("readonly", "");
+        //- document.getElementById('publisher_id').setAttribute("disabled", true);
+        //- document.getElementById('item_id').setAttribute("disabled", true);
+        document.getElementById('pay_wgt_gm').setAttribute("readonly", "");
+        document.getElementById('wgt_gm').setAttribute("readonly", "");
+        document.getElementById('reduce_wgt_gm').setAttribute("readonly", "");
+        $("#submitBtn").hide();
+        //- document.getElementById('image').setAttribute("readonly", "");
+      }
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $('#polisher_id').Template({
+        "template": "<option value='${=id}'>${=name}</option>",
+        "ajax": {
+          "url": "/api/polisher",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "polisher"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#polisher_id').data('value');
+        if (selectedVal) {
+          $('#polisher_id').selectpicker('val', selectedVal);
+        }
+        $('#polisher_id').selectpicker('refresh');
+      });
+
+      $('#item_id').Template({
+        "template": "<option value='${=id}'>${=item_name}</option>",
+        "ajax": {
+        "url": "/api/item",
+        "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "item"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#item_id').data('value');
+        if (selectedVal) {
+          $('#item_id').selectpicker('val', selectedVal);
+        }
+        $('#item_id').selectpicker('refresh');
+      });
+
+      $("#isfinished").change(function() {
+        if(this.checked) {
+          $("#isfinished").val("on");
+        } else {
+          $("#isfinished").val("");
+        }
+      });
+
+      $("#wgt_gm").change(function (event) {
+        var pay_wgt_gm = Number($("#pay_wgt_gm").val());
+        var wgt_gm = Number($("#wgt_gm").val());
+        if (wgt_gm) {
+          var reduce_wgt_gm = pay_wgt_gm - wgt_gm;
+          $("#reduce_wgt_gm").val(reduce_wgt_gm.toFixed(2));
+        }
+      });
+
+      $('a.image-delete').on('click', function(ev) {
+        if (confirm('Are you sure to remove this image?')) {
+          $("#image").val('');
+          $('img.image-preview').attr('src', '');
+          $('.image-add-continer').show();
+          $('.image-preview-container').hide();
+        }
+      });
+      imageUpload('#imgContainer', '#image', 'item');
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+    });

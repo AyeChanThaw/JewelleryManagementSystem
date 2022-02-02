@@ -1,0 +1,60 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm အထည်ကြမ်း
+  h1.page-header-mm အထည်ကြမ်း
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th.mm ရွှေချိန်
+          th.mm ကြေးချိန်
+          th.mm ဘော်ချိန်
+          th.mm မိုချိန်
+          th.mm ၁၃ ပဲရည်
+          th.mm ၁၄ ပဲရည်
+          th.mm ၁၅ ပဲရည်
+          th.mm ၁၆ ပဲရည်
+          th.actions-2
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-stock-dataentry').addClass('active');
+      $('div#dataentry_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/stock",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "stock"
+          },
+          "columns": [
+              { "data": "gold_total_gm" },
+              { "data": "brass_total_gm" },
+              { "data": "silver_total_gm" },
+              { "data": "mo_total_gm" },
+              { "data": "py_13" },
+              { "data": "py_14" },
+              { "data": "py_15" },
+              { "data": "py_16" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 8, orderable: false, render: dataTableOnlyEditRenderer("./stock-dataentry/edit", "#{permission.access}") }
+          ]
+      });
+    });

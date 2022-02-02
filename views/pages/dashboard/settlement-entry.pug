@@ -1,0 +1,153 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/settlement") အကြွေးဆပ်
+    li.breadcrumb-item.active
+      span စာရင်းသွင်း
+  h1.page-header အကြွေးဆပ်
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='supplier_id') အဝယ်ဒိုင်
+        div.col-sm-10
+          select#supplier_id.selectpicker.form-control(name='supplier_id', value=supplier_id, data-value=params.supplier_id, data-live-search="false", data-size="20", required)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='exchange_rate') Exchange Rate
+        div.col-sm-10
+            input.form-control.model-stock-code#exchange_rate(class='container text-right', type='decimalnumber', min="0", name='exchange_rate', value=params.exchange_rate, maxlength="55", required)
+
+      div.card
+        div.cart-body
+          h4.card-title အကြွေး စာရင်း
+          div.form-group.row#tblgen()
+            div.table-responsive.col-md-12
+              table#list.table.table-bordered
+                thead
+                  tr
+                    th(scope='col') ဘောင်ချာနံပါတ်
+                    th(scope='col') Amt To Pay
+                    th(scope='col') Pay amount
+                tbody#tbody
+                  //- input#debt_array(type='hidden', name='debt_array', value=debt_array)
+                  //- each detail, index in debt_array
+                  tr
+                    td.display-none
+                      input(type="hidden", id="purchase_id", name="purchase_id", value=params.purchase_id)
+                    td.display-none
+                      input(type="hidden", id="purchase_gold_id", name="purchase_gold_id", value=params.purchase_gold_id)
+                    td.display-none
+                      input(type="hidden", id="purchase_pt_id", name="purchase_pt_id", value=params.purchase_pt_id)
+                    td
+                      input(type="hidden", id="debt_id", name="debt_id", value=params.debt_id)
+                      //- span=detail.voc_no
+                      span=params.voc_no
+                    //- td
+                    //-   input(id="currency", name="currency", value=params.currency, style='border:0; background:transparent;', readonly)
+                    td
+                      //- span=params.amount
+                      input(id="amount", name="amount", value=params.amount, style='border:0; background:transparent;', readonly)
+                    td
+                      input(id="pay_amount", name="pay_amount", value=params.pay_amount, style='border:0; background:transparent;')
+                   
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var debt_array = "!{debt_array}";
+
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-settlement').addClass('active');
+      $('div#supplier_subitems').addClass('show');
+
+      var _tmp = $("#recordid").val();
+      if (_tmp != '') {
+        var supplier_id = document.getElementById('supplier_id');
+        supplier_id.setAttribute("disabled",true);
+      }
+
+      $('#supplier_id').Template({
+        "template": "<option value='${=id}'>${=supplier_name}</option>",
+        "ajax": {
+          "url": "/api/supplier",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "supplier"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#supplier_id').data('value');
+        if (selectedVal) {
+          $('#supplier_id').selectpicker('val', selectedVal);
+        }
+        $('#supplier_id').selectpicker('refresh');
+      });
+
+      $("#supplier_id").change(function(e) {
+        if (_tmp == '') {
+          var supplier_id = $("#supplier_id").val();
+          $("#tbody").empty();
+          let markup = "";
+          $.ajax({
+            url: "/api/debtview/getDebtBySupplier?supplier_id=" + supplier_id,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              debt_array = result.data;
+              debt_array.forEach((debt, index) => {
+                markup += "<tr><td style='display:none;'><input type='hidden' name='debt_id' value="+debt.debt_id+"></td><td style='display:none;'><input type='hidden' name='purchase_id' value="+debt.purchase_id+"></td><td style='display:none;'><input type='hidden' name='purchase_gold_id' value="+debt.purchase_gold_id+"></td><td style='display:none;'><input type='hidden' name='purchase_pt_id' value="+debt.purchase_pt_id+"></td><td><input type='text' name='voc_no' value='"+debt.voc_no+"' style='border:0; background:transparent;' readonly></td><td><input type='text' name='amount' value='"+debt.amount+"' style='border:0; background:transparent;' readonly></td><td><input type='decimal' id='pay_amount_"+index+"' name='pay_amount' value=0 style='border:0; background:transparent;'></td></tr>"
+              });
+              tablebody = $("#list #tbody");
+              tablebody.append(markup);
+              $("#debt_array").val(JSON.stringify(debt_array));
+            }
+          });
+        }
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

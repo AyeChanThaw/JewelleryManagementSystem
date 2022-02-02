@@ -1,0 +1,73 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm ဖယောင်းသွင်း
+  h1.page-header.mm ဖယောင်းသွင်း
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ဖယောင်းသွင်း
+          th.mm ဖုန်းနံပါတ်
+          th.mm တစ်လလုပ်အားခ
+          th.mm လိပ်စာ
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./waxing/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-waxing').removeClass('active');
+      $('li#menu-waxing').addClass('active');
+      $('div#setup_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/waxing",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "waxing"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "name" },
+              { "data": "phone" },
+              { "data": "salary" },
+              { "data": "address" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 3, render: dataTableSalaryWithCommas() },
+            { targets: 5, orderable: false, render: dataTableActionsRenderer("./waxing/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/waxing/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

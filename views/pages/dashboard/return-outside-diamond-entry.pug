@@ -1,0 +1,375 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/return-outside-diamond") ပြန်သွင်း (အပြင်စိန်)
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm ပြန်သွင်း (အပြင်စိန်)
+
+  div.modal.fade.model-diamond#dialogAddOutsideItems(tabindex='-1', role='dialog', aria-labelledby='AddOutsideItems')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title ပြန်သွင်းထည်
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-4.control-label(for='wgt_gm') အလေးချိန်
+            div.col-sm-7
+              input.form-control.model-stock-code#wgt_gm(class='container text-right', type='decimalnumber', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+
+          div.form-group.row
+            label.col-sm-4.control-label(for='category_id') အမျိုးအစား
+            div.col-sm-7
+              select#category_id.selectpicker.form-control(name='category_id', value=params.category_id, data-value=params.category_id, data-live-search="false", data-size="8", required)
+
+          div.form-group.row
+            label.col-sm-4.control-label(for='diamond_qty') စိန်ပွင့်ရေ
+            div.col-sm-7
+              input.form-control.model-stock-code#diamond_qty(class='container text-right', type='number', min="0", name='diamond_qty', value=params.diamond_qty, maxlength="55", required)
+            
+          div.form-group.row
+            label.col-sm-4.control-label.mm(for='price') တန်ဖိုး
+            div.col-sm-7
+              input.form-control.model-stock-code#price(class='container text-right', type='number', name='price', value=params.price, min="0", required)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogCancel(type='button', data-dismiss='modal') Cancel
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      //- input#total_amount(type='hidden', name='total_amount', value=total_amount)
+      input#customers(type='hidden', name='customers', value=customers)
+
+      div.form-group.row
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='date') ရက်စွဲ
+          div.col-sm-8
+            input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+        div.row.col-sm-6
+          label.col-sm-4.control-label(for='voc_no') Voc No
+          div.col-sm-8
+            input.form-control#voc_no.mm(type='text', name='voc_no', value=params.voc_no, maxlength="55", readonly)
+
+      div.form-group.row
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='customer_code') Customer ID
+          div.col-sm-8
+            input.form-control.model-stock-code#customer_code(type='text', name='customer_code', value=params.customer_code, maxlength="55", required)
+            input#customer_id(type='hidden', name='customer_id', value=params.customer_id)
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='customer_name') Customer နာမည်
+          div.col-sm-8
+            input.form-control.model-stock-code#customer_name(type='text', name='customer_name', value=params.customer_name, maxlength="55", required)
+
+      div.form-group.row
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='phone') ဖုန်းနံပါတ်
+          div.col-sm-8
+            input.form-control.model-stock-code#phone(type='number', name='phone', value=params.phone, maxlength="55", required)
+        div.row.col-sm-6
+          label.col-sm-4.control-label(for='sale_person_id') Sale Person
+          div.col-sm-8.label-data
+            select#sale_person_id.selectpicker.form-control(name='sale_person_id', value=params.sale_person_id, data-value=params.sale_person_id, data-live-search="false", data-size="20", required)
+              option(value="") [Select one]
+
+      div.text-right
+      div.card
+        div.card-body
+          h3.card-title.mm ပစ္စည်းစာရင်း
+          div.form-group.row#tblgen()
+            div.table-responsive.col-md-12
+              table#list.table.table-bordered
+                thead
+                  tr
+                    th.mm(scope='col') အလေးချိန်
+                    th.mm(scope='col') အမျိုးအစား
+                    th.mm(scope='col') စိန်ပွင့်ရေ 
+                    th.mm(scope='col') တန်ဖိုး
+                    th.mm.edit-hidden(scope='col') 
+                        a.btn.btn-success.list-action-text#btngeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddOutsideItems")
+                            i.fa.fa-plus
+                tbody#tbody
+                  input#item_array(type='hidden', name='item_array', value=item_array)
+                
+                  each item, index in item_array
+                    tr
+                      td
+                        span=item.wgt_gm
+                      td
+                        span=item.category_name
+                      td
+                        span=item.diamond_qty
+                      td
+                        span=item.price
+                      td.edit-hidden
+                        button.btn.btn-danger.btn-xs.btn-delete Delete
+
+      div.card
+        div.card-body 
+          h3.card-title.mm ငွေပေးချေမှု
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='total_amount') Total Amount
+              div.col-sm-8
+                input.form-control.model-stock-code#total_amount(type='text', name='total_amount', value=params.total_amount, maxlength="55", readonly)
+
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label(for='profit_percent') အမြတ် %
+              div.col-sm-8
+                input.form-control.model-stock-code#profit_percent(type='number', name='profit_percent', value=params.profit_percent, maxlength="55")
+
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='profit_amount') အမြတ်
+              div.col-sm-8
+                input.form-control#profit_amount(class='container text-right', type='decimalnumber', min="0", name='profit_amount', value=params.profit_amount, readonly)
+
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='discount_amount') Discount
+              div.col-sm-8
+                input.form-control.model-stock-code#discount_amount(class='container text-right', type='decimalnumber', min="0", name='discount_amount', value=params.discount_amount)
+
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='subtotal') ကျန်ငွေ
+              div.col-sm-8
+                input.form-control.model-stock-code#subtotal(type='text', name='subtotal', value=params.subtotal, maxlength="55", readonly)
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var item_array = [];
+      var total_amount = 0;
+      $("#btngeneral").hide();
+
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-return-outside-diamond').addClass('active');
+      $('div#returnshowroom_subitems').addClass('show');
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      var _tmp = $("#recordid").val();
+      if (_tmp != '') {
+        item_array = JSON.parse($("#item_array").val());
+        item_array.forEach((item) => {
+          $price = item.price.replace(/,/g, '');
+          total_amount += Number($price);
+        });
+        if (item_array.length >= 3) {
+          $("#btngeneral").hide();
+        } else {
+          $("#btngeneral").show();
+        }
+        document.getElementById('customer_code').setAttribute("readonly", "");
+        document.getElementById('customer_name').setAttribute("readonly", "");
+        document.getElementById('phone').setAttribute("readonly", "");
+      } else {
+
+      }
+
+      $('#category_id').Template({
+        "template": "<option value='${=id}'>${=category_name}</option>",
+        "ajax": {
+          "url": "/api/customerview/getCategory",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "data"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#category_id').data('value');
+        if (selectedVal) {
+          $('#category_id').selectpicker('val', selectedVal);
+        }
+        $('#category_id').selectpicker('refresh');
+      });
+
+      $('#sale_person_id').Template({
+        "template": "<option value='${=id}'>${=sale_person_name}</option>",
+        "ajax": {
+          "url": "/api/sale_person",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "sale_person"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#sale_person_id').data('value');
+        if (selectedVal) {
+          $('#sale_person_id').selectpicker('val', selectedVal);
+        }
+        $('#sale_person_id').selectpicker('refresh');
+      });
+
+      function commaSeparateNumber(val){
+        while (/(\d+)(\d{3})/.test(val.toString())){
+          val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+        }
+        return val;
+      }
+
+      function calcSubtotal() {
+        $profit_percent = $("#profit_percent").val() > 0 ? $("#profit_percent").val() : 0;
+        $profit_amount = total_amount * ($profit_percent / 100);
+        $profit_amount = Number($profit_amount);
+        $profit_amt_comma = commaSeparateNumber($profit_amount.toFixed(2));
+        $("#profit_amount").val($profit_amt_comma);
+        $discount_amount = $("#discount_amount").val().replace(/,/g, '');
+        $subtotal = Number(total_amount) - (Number($profit_amount) + Number($discount_amount));
+        $subtotal_comma = commaSeparateNumber($subtotal.toFixed(2));
+        $("#subtotal").val($subtotal_comma);
+      }
+
+      const modal = $(".modal-body");
+      const customers = JSON.parse($("#customers").val());
+      $("#customer_code").autocomplete({
+        source: customers,
+        minLength: 1,
+        select: function (event, cus) {
+          event.preventDefault();
+          var selectedCus = cus.item.value;
+          $("#customer_id").val('');
+          $("#customer_code").val('');
+          $("#customer_name").val('');
+          $("#phone").val('');
+          $.ajax({
+            "url": "/api/customerview/getCustomerById?id="+selectedCus,
+            "headers": {"authorization": "Bearer " + token},
+            success: function(result){ 
+              $("#customer_id").val(result.customer[0].id);
+              $("#customer_code").val(result.customer[0].code);
+              $("#customer_name").val(result.customer[0].customer_name);
+              $("#phone").val(result.customer[0].phone);
+              $("#btngeneral").show();
+            }
+          });
+        },
+        focus: function(event, cus) {
+          event.preventDefault();
+          $("#customer_code").val(cus.item.label);
+        }
+      });
+
+      $("#profit_percent").change(function() {
+        $profit_percent = $("#profit_percent").val();
+        $profit_amt = total_amount * ($profit_percent / 100);
+        $profit_amt = Number($profit_amt);
+        $profit_amt_comma = commaSeparateNumber($profit_amt.toFixed(2));
+        $("#profit_amount").val($profit_amt_comma);
+        calcSubtotal();
+      });
+
+      $("#discount_amount").change(function() {
+        $discount_amount = $("#discount_amount").val();
+        calcSubtotal();
+      });
+
+      $("#btngeneral").on("click", function(ev) {
+        isEdit = false;
+        ev.preventDefault();
+        var target = $(this).attr("href");
+
+        $("#wgt_gm").val("");
+        $("#diamond_qty").val("");
+        $("#price").val("");
+      });
+
+      $("#dialogAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        var selected = $('#category_id option:selected');
+        selected.each(function (a) {
+            $category_name = $(this).text();
+            $category_id = $(this).val();
+        })
+        $wgt_gm = $("#wgt_gm").val() != "" ? $("#wgt_gm").val() : 0;
+        $diamond_qty = $("#diamond_qty").val();
+        $price = Number($("#price").val());
+        total_amount += Number($price);
+        $price_comma = commaSeparateNumber($price.toFixed(2));
+        $total_amount_comma = commaSeparateNumber(total_amount.toFixed(2));
+        $("#total_amount").val($total_amount_comma);
+        calcSubtotal();
+        
+        var item = {"wgt_gm": $wgt_gm, "category_id": $category_id, "diamond_qty": $diamond_qty, "price": $price };
+        item_array.push(item);
+        if (item_array.length == 3) {
+          $("#btngeneral").hide();
+        }
+        markup = "<tr><td> " + $wgt_gm + "</td><td> " + $category_name + "</td><td> " + $diamond_qty + "</td><td> " + $price_comma + "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+        tablebody = $("#list #tbody");
+        tablebody.append(markup);
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#list").on("click", ".btn-delete", function(ev){
+        item_array = JSON.parse($("#item_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        $price_comma =  item_array[index].price;
+        $price = $price_comma.replace(/,/g, '');
+        total_amount -= Number($price);
+        $total_amount_comma = commaSeparateNumber(total_amount.toFixed(2));
+        $("#total_amount").val($total_amount_comma);
+        calcSubtotal();
+        item_array.splice(index,1);
+        if (item_array.length < 3) {
+          $("#btngeneral").show();
+        }
+        $(this).parents("tr").remove();
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

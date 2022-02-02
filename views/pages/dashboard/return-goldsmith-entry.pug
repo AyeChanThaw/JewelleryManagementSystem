@@ -1,0 +1,188 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/return-goldsmith") ပန်းတိမ်ပေး ပြင်ထည်
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm ပန်းတိမ်ပေး ပြင်ထည်
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#return_item_id(type='hidden', name='return_item_id', value=params.return_item_id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='return_item_code') ပြန်သွင်း code
+        div.col-sm-10
+          input.form-control#return_item_code(type='text', name='return_item_code', value=params.return_item_code, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='item_wgt_gm') ပြန်သွင်း အလေးချိန်
+        div.col-sm-10
+            input.form-control.model-stock-code#item_wgt_gm(class='container text-right', type='number', min="0", name='item_wgt_gm', value=params.item_wgt_gm, maxlength="55", readonly)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='goldsmith_id') ပန်းထိမ်ဆရာ
+        div.col-sm-10
+          select#goldsmith_id.selectpicker.form-control(name='goldsmith_id', value=params.goldsmith_id, data-value=params.goldsmith_id, data-live-search="false", data-size="20", readonly)
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='goldrate') ပဲရည်
+        div.col-sm-10
+          //- input.form-control.model-stock-code#goldrate(class='container text-right', type='decimal', min="0", name='goldrate', value=params.goldrate, maxlength="55")
+          select#goldrate.selectpicker.form-control(name='goldrate', value=params.goldrate, data-value=params.goldrate, data-live-search="false", data-size="8", required)
+            option(value="") [Select one]
+            option(value="a") ၁၆ ပဲရည်
+            option(value="b") ၁၅ ပဲရည်
+            option(value="c") ၁၄ ပဲရည်
+            option(value="d") ၁၃ ပဲရည်
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='pay_wgt_gm') စိုက်ရွှေ
+        div.col-sm-10
+            input.form-control.model-stock-code#pay_wgt_gm(class='container text-right', type='decimal', min="0", name='pay_wgt_gm', value=params.pay_wgt_gm, maxlength="55")
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='wgt_gm') Total အလေးချိန်
+        div.col-sm-10
+            input.form-control.model-stock-code#wgt_gm(class='container text-right', type='decimal', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='cost') ကုန်ကျစရိတ်
+        div.col-sm-10
+          input.form-control.model-stock-code#cost(class='container text-right', type='number', min="0", name='cost', value=params.cost, maxlength="55")
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      var total_of_give = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-return-goldsmith').addClass('active');
+      $('div#returnproduction_subitems').addClass('show');
+      $("#check-reduce").hide();
+
+      var _tmp = $("#recordid").val();
+      if (_tmp != "") {
+        document.getElementById('date').setAttribute("readonly", "");
+        document.getElementById('return_item_code').setAttribute("readonly", "");
+        document.getElementById('goldrate').setAttribute("readonly", "");
+      }
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $("select#goldrate").Template({
+        "template": "<option value='a'>၁၆ ပဲရည်</option><option value='b'>၁၅ ပဲရည်</option><option value='c'>၁၄ ပဲရည်</option><option value='d'>၁၃ ပဲရည်</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#goldrate').data('value');
+        if (selectedVal) {
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#goldrate').selectpicker('refresh');
+      });
+
+      $('#goldsmith_id').Template({
+        "template": "<option value='${=id}'>${=goldsmith_name}</option>",
+        "ajax": {
+          "url": "/api/goldsmith",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "goldsmith"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#goldsmith_id').data('value');
+        if (selectedVal) {
+          $('#goldsmith_id').selectpicker('val', selectedVal);
+        }
+        $('#goldsmith_id').selectpicker('refresh');
+      });
+
+      $("#pay_wgt_gm").change(function (event) {
+        calcWgtGm();
+      });
+
+      function calcWgtGm() {
+        $item_wgt_gm = $("#item_wgt_gm").val();
+        $pay_wgt_gm = $("#pay_wgt_gm").val();
+        $wgt_gm = Number($item_wgt_gm) + Number($pay_wgt_gm);
+        $("#wgt_gm").val($wgt_gm.toFixed(2));
+      }
+
+      $('a.image-delete').on('click', function(ev) {
+        if (confirm('Are you sure to remove this image?')) {
+          $("#image").val('');
+          $('img.image-preview').attr('src', '');
+          $('.image-add-continer').show();
+          $('.image-preview-container').hide();
+        }
+      });
+      //- imageUpload('#imgContainer', '#image', 'item');
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+    });

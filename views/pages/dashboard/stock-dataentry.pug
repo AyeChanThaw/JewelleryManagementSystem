@@ -1,0 +1,117 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/stock-dataentry") Stock Data Entry
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm Stock Data Entry
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='gold_total_gm') ရွှေချိန်
+        div.col-sm-10
+          input.form-control#gold_total_gm(class='container text-right', type='decimalnumber', min="0", name='gold_total_gm', value=params.gold_total_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='brass_total_gm') ကြေးချိန်
+        div.col-sm-10
+          input.form-control#brass_total_gm(class='container text-right', type='decimalnumber', min="0", name='brass_total_gm', value=params.brass_total_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='silver_total_gm') ဘော်ချိန်
+        div.col-sm-10
+          input.form-control#silver_total_gm(class='container text-right', type='decimalnumber', min="0", name='silver_total_gm', value=params.silver_total_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='mo_total_gm') မိုချိန်
+        div.col-sm-10
+          input.form-control#mo_total_gm(class='container text-right', type='decimalnumber', min="0", name='mo_total_gm', value=params.mo_total_gm, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='py_13') ၁၃ ပဲရည်
+        div.col-sm-10
+          input.form-control#py_13(class='container text-right', type='decimalnumber', min="0", name='py_13', value=params.py_13, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='py_14') ၁၄ ပဲရည်
+        div.col-sm-10
+          input.form-control#py_14(class='container text-right', type='decimalnumber', min="0", name='py_14', value=params.py_14, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='py_15') ၁၅ ပဲရည်
+        div.col-sm-10
+          input.form-control#py_15(class='container text-right', type='decimalnumber', min="0", name='py_15', value=params.py_15, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='py_16') ၁၆ ပဲရည်
+        div.col-sm-10
+          input.form-control#py_16(class='container text-right', type='decimalnumber', min="0", name='py_16', value=params.py_16, required)
+      
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-stock-dataentry').addClass('active');
+      $('div#dataentry_subitems').addClass('show');
+
+      var _tmp = $("#recordid").val();
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

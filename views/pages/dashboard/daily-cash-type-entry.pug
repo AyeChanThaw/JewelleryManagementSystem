@@ -1,0 +1,108 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/daily-cash-type") နေ့စဉ်အသုံးစာရင်း အမျိုးအစား
+    li.breadcrumb-item.active
+      span စာရင်းသွင်း
+  h1.page-header နေ့စဉ်အသုံးစာရင်း အမျိုးအစား
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+
+      div.text-right#check-code
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='code') Code
+        div.col-sm-8.label-data
+          input.form-control#code.mm(type='number', name='code', value=params.code, maxlength="55", required autofocus)
+
+      div.form-group.row
+        div.row.col-sm-12
+          label.col-sm-2.control-label(for='type') အမျိုးအစား
+          div.col-sm-8
+            textarea.form-control.mm#type(name='type')= params.type
+      
+      div.form-group.row
+        div.row.col-sm-12
+          label.col-sm-2.control-label(for='description') အကြောင်းအရာ
+          div.col-sm-8
+            textarea.form-control.mm#description(name='description')= params.description
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var submit = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-daily-cash-type').addClass('active');
+      $('div#setup_subitems').addClass('show');
+      $("#check-code").hide();
+
+      $("#code").on('change',function(){
+        var recordid = $("#recordid").val();
+        var code = $("#code").val();
+        if (submit == 0) {
+          $.ajax({
+            url: "/api/dailycashview/checkDailyCashType?code=" + code + "&typeid=" + recordid,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              if (result == true) {
+                $("#check-code").html("Already Exist!").addClass('text-danger').show();
+                submitBtn.setAttribute("disabled", "");
+              } else {
+                $("#check-code").hide();
+                submitBtn.removeAttribute("disabled");
+              }            
+            }
+          });
+        }
+      });
+
+      $("#submitBtn").click(function() {
+        //- $("#submitBtn").setAttribute("disabled", "");
+        submit = 1;
+      })
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

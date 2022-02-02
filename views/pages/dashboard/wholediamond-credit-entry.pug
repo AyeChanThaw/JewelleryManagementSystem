@@ -1,0 +1,173 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/wholediamond-credit") စိန်အဝယ်(ကြွေး)
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header စိန်အဝယ်(ကြွေး)
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+
+      div.card
+        div.cart-body
+          h4.card-title ဝယ်သူအချက်အလက်
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='voc_no') ဘောင်ချာနံပါတ် 
+            div.col-sm-3.label-data
+              input.invoice.form-control#voc_no.mm(type='text', readonly, name='voc_no', value=params.voc_no, maxlength="55", required autofocus)
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='customer') ဝယ်သူအမည် 
+            div.col-sm-3.label-data
+              input.form-control#customer_name.mm(type='text', readonly, name='customer_name', value=params.customer_name, maxlength="55", required autofocus)
+            div.col-sm-1.label-data
+              label.control-label(for='phone') ဖုန်း
+            div.col-sm-6.label-data
+              input.form-control#phone.mm(type='text', readonly, name='phone', value=params.phone, maxlength="55", required autofocus)  
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='address') လိပ်စာ 
+            div.col-sm-10.label-data
+              input.form-control#address.mm(type='text', readonly, name='address', value=params.address, maxlength="55", required autofocus)
+
+      div.card
+        div.cart-body
+          h4.card-title ကျသင့်ငွေ
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='net_amount') စုစုပေါင်း ကျသင့်ငွေ
+            div.col-sm-3
+              div.row
+                  div.col-sm-9
+                    input.form-control#net_amount(class='container text-right', readonly, class='net_amount', type='decimalnumber', name='net_amount', value=params.net_amount, maxlength="55", required autofocus)
+                  div.col-sm-3.label-data
+                    label.control-label(for='net_amount') Ks.
+
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='advance_amount') စရံငွေ
+            div.col-sm-3
+              div.row
+                  div.col-sm-9
+                    input.form-control#advance_amount(class='container text-right', readonly, type='decimalnumber', name='advance_amount', value=params.advance_amount, maxlength="55", required)
+                  div.col-sm-3.label-data
+                    label.control-label(for='advance_amount') Ks.
+
+          div.form-group.row
+            div.col-sm-2.label-data
+              label.control-label(for='balance_amount') လက်ကျန်ငွေ
+            div.col-sm-3
+              div.row
+                  div.col-sm-9
+                    input.form-control#balance_amount(class='container text-right', readonly, type='decimalnumber', name='balance_amount', value=params.balance_amount, maxlength="55", required)
+                  div.col-sm-3.label-data
+                    label.control-label(for='balance_amount') Ks.
+
+          div.form-group.row
+            div.col-sm-1.label-data
+              label.control-label(for='credit_payment_date') ရက်စွဲ 
+            div.col-sm-2.label-data
+              input.form-control#credit_payment_date.mm(type='text', name='credit_payment_date', value=params.credit_payment_date, maxlength="55", required autofocus)
+            div.col-sm-2.label-data
+              label.control-label(for='pay_amount') ဆပ်ငွေ
+            div.col-sm-3
+              div.row
+                  div.col-sm-9
+                    input.form-control#pay_amount(class='container text-right', type='decimalnumber', name='pay_amount', value=params.pay_amount, maxlength="55", required autofocus)
+                  div.col-sm-3.label-data
+                    label.control-label(for='pay_amount') Ks.
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button', name='cancel') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script(src='/js/items_rate.js')
+  script(src='/js/scripts-upload.js')
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+        $('div.sidebar-sticky li.nav-item').removeClass('active');
+        $('li#menu-sale-credit').addClass('active');  
+        $('div#sale_subitems').addClass('show');       
+
+        $("#credit_payment_date").datepicker({
+          format: "dd/M/yyyy",
+          autoclose: true,
+          todayHighlight: true,
+          orientation: 'bottom'
+        });
+
+      $(window).keypress(function(event) {
+          if (!(event.which == 67 && event.ctrlKey) && !(event.which == 67)) return true;
+          $("#container form input[name=cancel]").click();
+          event.preventDefault();
+          return false;
+      }); 
+
+      $("#advance_amount").keypress(function(e){
+          var keycode = (event.keyCode ? event.keyCode : event.which);
+          if(keycode == '13' && event.key === "Enter")
+          {
+            $tmpadvance_amount = parseFloat($("#advance_amount").val());
+            if(isNaN($tmpnet_amount)) {
+              $tmpnet_amount = 0;
+            }
+            $tmppay_amount = parseFloat($("#pay_amount").val());
+            if(isNaN($tmppay_amount)) {
+              $tmppay_amount = 0;
+            }
+          }
+      });
+
+      $("#alert").hide();
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          //- url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+        });
+      });
+    }); 

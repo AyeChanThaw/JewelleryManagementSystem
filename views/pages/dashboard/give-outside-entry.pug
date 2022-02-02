@@ -1,0 +1,482 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/give-outside") အပြင် ပန်းတိမ်ပေး
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm အပြင် ပန်းတိမ်ပေး
+
+  div.modal.fade.model-diamond#dialogAddMouldItems(tabindex='-1', role='dialog', aria-labelledby='AddDiamondItems')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title အထည်ကြမ်း
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-2.control-label(for='category_id') အမျိုးအစား
+            div.col-sm-10
+              select#category_id.selectpicker.form-control(name='category_id', value=params.category_id, data-value=params.category_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+            
+          div.form-group.row
+            label.col-sm-2.control-label(for='code') Code
+            div.col-sm-10
+              input.form-control.model-stock-code#code(type='text', name='code',value=params.code, maxlength="55")
+
+          div.text-right#check-gold-gm
+          div.form-group.row
+            label.col-sm-2.control-label(for='gold_wgt_gm') ရွှေ အလေးချိန်
+            div.col-sm-10
+              input.form-control.model-stock-code#gold_wgt_gm(class='container text-right', type='decimalnumber', min="0", name='gold_wgt_gm', value=params.gold_wgt_gm, maxlength="55", required)
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='type') Type
+            div.col-sm-10
+              select#type.selectpicker.form-control(name='type', value=params.type, data-value=params.type, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+                option(value="gold") Gold
+                option(value="diamond") Diamond
+
+          div.form-group.row.diamond-group
+            label.col-sm-2.control-label(for='wholediamond_id') စိန်ထုပ် code
+            div.col-sm-10
+              select#wholediamond_id.selectpicker.form-control(name='wholediamond_id', value=params.wholediamond_id, data-value=params.wholediamond_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+
+          div.form-group.row.diamond-group
+            label.col-sm-2.control-label(for='diamond_id') စိန်လုံးစီး code
+            div.col-sm-10
+              select#diamond_id.selectpicker.form-control(name='diamond_id', value=params.diamond_id, data-value=params.diamond_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+            
+          div.form-group.row.diamond-group
+            label.col-sm-2.control-label(for='qty') အပွင့်ရေ
+            div.col-sm-10
+              input.form-control.model-stock-code#qty(class='container text-right', type='decimalnumber', min="0", name='qty', value=params.qty, maxlength="55", required)
+
+          div.form-group.row.diamond-group
+            label.col-sm-2.control-label(for='diamond_wgt_ct') စိန် အလေးချိန်
+            div.col-sm-10
+              input.form-control.model-stock-code#diamond_wgt_ct(class='container text-right', type='decimalnumber', min="0", name='diamond_wgt_ct', value=params.diamond_wgt_ct, maxlength="55", required)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogCancel(type='button', data-dismiss='modal') Cancel
+
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#codes(type='hidden', name='codes', value=params.codes)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='goldsmith_id') ပန်းထိမ်ဆရာ
+        div.col-sm-10
+            select#goldsmith_id.selectpicker.form-control(name='goldsmith_id', value=params.goldsmith_id, data-value=params.goldsmith_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='goldrate') ပဲရည်
+        div.col-sm-10
+            select#goldrate.selectpicker.form-control(name='goldrate', value=params.goldrate, data-value=params.goldrate, data-live-search="false", data-size="8", required)
+                option(value="") [Select one]
+                option(value="a") ၁၆ ပဲရည်
+                option(value="b") ၁၅ ပဲရည်
+                option(value="c") ၁၄ ပဲရည်
+                option(value="d") ၁၃ ပဲရည်
+
+      //- div.form-group.row
+      //-   label.col-sm-2.control-label.mm(for='code') Code
+      //-   div.col-sm-10
+      //-     input.form-control#code(type='text', name='code', value=params.code, readonly)
+
+      div.form-group.row
+        div.col-sm-6.label-data
+          strong finished &nbsp;
+            input#isfinished(type="checkbox", name="isfinished", value=params.isfinished, checked=(params.isfinished == 1))
+
+      div.form-group.row#tblgen()
+        div.table-responsive.col-md-12
+          table#list.table.table-bordered
+            thead
+                tr
+                //- th.mm(scope='col') ပဲရည်
+                th.mm(scope='col') အမျိုးအစား
+                th(scope='col') Code
+                th.mm(scope='col') ရွှေ အလေးချိန်
+                th.mm(scope='col') Type
+                th.mm(scope='col') စိန်ထုပ်code
+                th.mm(scope='col') စိန်လုံးစီးcode
+                th.mm(scope='col') အပွင့်ရေ
+                th.mm(scope='col') စိန် အလေးချိန်
+                th.mm.edit-hidden(scope='col') 
+                  a.btn.btn-success.list-action-text#btngeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddMouldItems")
+                    i.fa.fa-plus
+            tbody#tbody
+              input#item_array(type='hidden', name='item_array', value=item_array)
+            
+              each item, index in item_array
+                tr
+                  //- td
+                  //-   span=item.goldrate
+                  td
+                    span=item.category
+                  td
+                    span=item.code
+                  td 
+                    span=item.gold_wgt_gm
+                  td
+                    span=item.type
+                  td
+                    span=item.wholediamond
+                  td
+                    span=item.diamond
+                  td
+                    span=item.qty
+                  td
+                    span=item.diamond_wgt_ct
+                  td.edit-hidden
+                    button.btn.btn-danger.btn-xs.btn-delete Delete
+                  
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      var item_array = [];
+      var codes = [];
+      var current_qty = 0;
+      var current_gold_gm = 0;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-give-outside').addClass('active');
+      $('div#production_subitems').addClass('show');
+      $("#check-gold-gm").hide();
+
+      var _tmp = $("#recordid").val();
+      var isfinished = $("#isfinished").val();
+      if (_tmp != "" && isfinished == 1) {
+        document.getElementById('date').setAttribute("readonly", "");
+        //- document.getElementById('goldrate').setAttribute("readonly", "");
+        //- document.getElementById('gold_wgt_gm').setAttribute("readonly", "");
+        //- document.getElementById('raw_wgt_gm').setAttribute("readonly", "");
+        //- document.getElementById('reduce_wgt_gm').setAttribute("readonly", "");
+        $(".edit-hidden").hide();
+        $("#submitBtn").hide();
+      }
+      if (_tmp != '') {
+        document.getElementById('goldrate').setAttribute("readonly", "");
+        item_array = JSON.parse($("#item_array").val());
+        current_gold_gm = "!{current_gold_gm}";
+        current_gold_gm = Number(current_gold_gm);
+      }
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $('#goldsmith_id').Template({
+        "template": "<option value='${=id}'>${=goldsmith_name}</option>",
+        "ajax": {
+          "url": "/api/goldsmith",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "goldsmith"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#goldsmith_id').data('value');
+        if (selectedVal) {
+          $('#goldsmith_id').selectpicker('val', selectedVal);
+        }
+        $('#goldsmith_id').selectpicker('refresh');
+      });
+
+      $("select#goldrate").Template({
+        "template": "<option value='a'>၁၆ ပဲရည်</option><option value='b'>၁၅ ပဲရည်</option><option value='c'>၁၄ ပဲရည်</option><option value='d'>၁၃ ပဲရည်</option>"
+      }).on('completed', function() {
+        var selectedVal = $('#goldrate').data('value');
+        if (selectedVal) {
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+          $("#goldrate option[value=" + selectedVal + "]").prop('selected', true);
+        }
+        $('#goldrate').selectpicker('refresh');
+      });
+
+      $('#category_id').Template({
+        "template": "<option value='${=id}'>${=category_name}</option>",
+        "ajax": {
+          "url": "/api/category",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "category"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#category_id').data('value');
+        if (selectedVal) {
+          $('#category_id').selectpicker('val', selectedVal);
+        }
+        $('#category_id').selectpicker('refresh');
+      });
+
+      $("#goldrate").change(function(event) {
+        var goldrate = $("#goldrate").val();
+        $.ajax({
+            url: "/api/stock",
+            headers: {"authorization": "Bearer " + token},
+            success: function(result) {
+                //- if (goldrate == "၁၆ ပဲရည်")
+                if (goldrate == "a")
+                    current_gold_gm = Number(result.stock[0].py_16);
+                //- else if (goldrate == "၁၅ ပဲရည်")
+                else if (goldrate == "b")
+                    current_gold_gm = Number(result.stock[0].py_15);
+                //- else if (goldrate == "၁၄ ပဲရည်")
+                else if (goldrate == "c")
+                    current_gold_gm = Number(result.stock[0].py_14);
+                //- else if (goldrate == "၁၃ ပဲရည်")
+                else if (goldrate == "d")
+                    current_gold_gm = Number(result.stock[0].py_13);
+            }
+        });
+      });
+
+      $("#gold_wgt_gm").change(function(event) {
+          var gold_wgt_gm = Number($("#gold_wgt_gm").val());
+          if (gold_wgt_gm > current_gold_gm) {
+              $("#check-gold-gm").html("Not Enough!").addClass('text-danger').show();
+          } else {
+              $("#check-gold-gm").hide();
+          }
+      });
+
+      $("#category_id").change(function(event) {
+        var category_id = $("#category_id").val();
+        codes = JSON.parse($("#codes").val());
+        $.ajax({
+          url: "/api/category?filter=id,eq," + category_id,
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            const prefix = result.category[0].category_code;
+            codes.forEach((autogen) => {
+              if (autogen.prefix == prefix) {
+                autogen.count++;
+                const code = prefix + datecode + autogen.count;
+                $("#code").val(code);
+              }
+            })
+          }
+        })
+      });
+
+      $("#type").on("change", function(e) {
+        $type = $("#type").val();
+        if ($type == "diamond") {
+          $(".diamond-group").show();
+        } else {
+          $(".diamond-group").hide();
+        }
+      });
+
+      $('#wholediamond_id').Template({
+        "template": "<option value='${=id}'>${=code}</option>",
+        "ajax": {
+          "url": "/api/wholediamondview/getWholeDiamond",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "data"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#wholediamond_id').data('value');
+        if (selectedVal) {
+          $('#wholediamond_id').selectpicker('val', selectedVal);
+        }
+        $('#wholediamond_id').selectpicker('refresh');
+      });
+
+      $("#wholediamond_id").change(function(event) {
+        $('#diamond_id').empty();
+        $('#diamond_id').Template({
+          "template": "<option value='${=diamond_id}'>${=code}</option>",
+          "ajax": {
+          "url": "/api/wholediamondview/getDiamondItems?wholediamond_id=" + $('#wholediamond_id option:selected').val(),
+          "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          }
+        }).on('completed', function() {
+          var selectedVal = $('#diamond_id').data('value');
+          if (selectedVal) {
+          $('#diamond_id').selectpicker('val', selectedVal);
+          }
+          $('#diamond_id').selectpicker('refresh');
+        });
+      });
+
+      $("#diamond_id").change(function (event) {
+        $.ajax({
+          url: "/api/wholediamondview/getQtyByDiamond?diamond_id=" + $('#diamond_id option:selected').val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            current_qty = result.data.current_qty;
+          }
+        })
+      });
+
+      $("#qty").change(function (event) {
+        var qty = Number($("#qty").val());
+        if (qty > current_qty) {
+          $("#qty").val(current_qty);
+        }
+      })
+
+      $("#isfinished").change(function() {
+        if(this.checked) {
+          $("#isfinished").val("on");
+        } else {
+          $("#isfinished").val("");
+        }
+      });
+
+      $("#list").on("click", ".btn-delete", function(ev){
+        item_array = JSON.parse($("#item_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        $wgt_gm = item_array[index].wgt_gm;
+        current_gold_gm += Number($wgt_gm);
+        item_array.splice(index,1);
+        $(this).parents("tr").remove();
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#btngeneral").on("click", function(ev) {
+        isEdit = false;
+        ev.preventDefault();
+        var target = $(this).attr("href");
+        $("#category_id").empty();
+        $("#code").val("");
+        $("#gold_wgt_gm").val("");
+        $("#wholediamond_id").empty();
+        $("#diamond_id").empty();
+        $("#qty").val("");
+        $("#diamond_wgt_ct").val("");
+        $('#category_id').Template({
+          "template": "<option value='${=id}'>${=category_name}</option>",
+          "ajax": {
+            "url": "/api/customerview/getCategory",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          }
+        }).on('completed', function() {
+          var selectedVal = $('#category_id').data('value');
+          if (selectedVal) {
+            $('#category_id').selectpicker('val', selectedVal);
+          }
+          $('#category_id').selectpicker('refresh');
+        });
+        $('#wholediamond_id').Template({
+          "template": "<option value='${=id}'>${=code}</option>",
+          "ajax": {
+            "url": "/api/wholediamondview/getWholeDiamond",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          }
+        }).on('completed', function() {
+          var selectedVal = $('#wholediamond_id').data('value');
+          if (selectedVal) {
+            $('#wholediamond_id').selectpicker('val', selectedVal);
+          }
+          $('#wholediamond_id').selectpicker('refresh');
+        });
+      });
+
+      $("#dialogAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        $("#codes").val(JSON.stringify(codes));
+        $code = $("#code").val();
+        $gold_wgt_gm = $("#gold_wgt_gm").val();
+        current_gold_gm -= Number($gold_wgt_gm);
+        var seleced_category = $('#category_id option:selected');
+        seleced_category.each(function (a) {
+            $category = $(this).text();
+            $category_id = $(this).val();
+        });
+        $type =$("#type").val();
+        var seleced_wd = $('#wholediamond_id option:selected');
+        $wholediamond = "";
+        $wholediamond_id = "";
+        seleced_wd.each(function (a) {
+            $wholediamond = $(this).text();
+            $wholediamond_id = $(this).val();
+        });
+        if ($type == "gold")
+          $wholediamond = "";
+        var seleced_diamond = $('#diamond_id option:selected');
+        $diamond = "";
+        $diamond_id = "";
+        seleced_diamond.each(function (a) {
+            $diamond = $(this).text();
+            $diamond_id = $(this).val();
+        });
+        $qty = $("#qty").val();
+        $diamond_wgt_ct = $("#diamond_wgt_ct").val();
+        var item = {"category_id": $category_id, "code": $code, "gold_wgt_gm": $gold_wgt_gm, "type": $type, "wholediamond_id": $wholediamond_id, "diamond_id": $diamond_id, "qty": $qty, "diamond_wgt_ct": $diamond_wgt_ct };
+        item_array.push(item);
+        markup = "<tr><td>"+ $category +"</td><td>" + $code + "</td><td>" +$gold_wgt_gm+ "</td><td>" +$type+ "</td><td>"+$wholediamond+"</td><td>"+$diamond+"</td><td>"+$qty+"</td><td>"+$diamond_wgt_ct+"</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+        tablebody = $("#list #tbody");
+        tablebody.append(markup);
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

@@ -1,0 +1,79 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm PT အဝယ်
+  h1.page-header-mm PT အဝယ်
+  include ../../includes/delete-confirm
+  include ../../includes/broken-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th Voucher No.
+          th Reference No.
+          th Cashier Name
+          //- th.mm ကာလပေါက်ရွှေဈေး
+          th.mm စုစုပေါင်းကုန်ကျစရိတ်
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./purchase-pt/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody 
+    script.
+      $(document).ready(function() {
+        var token = "!{token}";
+        $('div.sidebar-sticky li.nav-item').removeClass('active');
+        $('li#menu-purchase-pt').addClass('active');  
+        $('div#purchase_subitems').addClass('show');       
+
+        $.fn.dataTable.ext.errMode = 'none';
+        var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+          }).DataTable({
+            "autoWidth": true,
+            "ajax": { 
+              "url": "/api/purchase_pt?columns=purchase_pt.*,user.username&join=left,user,cashier_id,eq,user.id&order=date,desc",
+              "headers": {"authorization": "Bearer " + token},
+              "dataSrc": "purchase_pt"
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "date" },
+                { "data": "voc_no" },
+                { "data": "ref_no"},
+                { "data": "username" },
+                //- { "data": "current_rate" },
+                { "data": "total_price" },
+                { "data": "actions", "className": "nowrap" }
+            ],
+            "columnDefs": [
+              { targets: 0, render: dataTableIndexRenderer() },
+              { targets: 1, render: dataTableDateRenderer() },
+              { targets: 5, render: dataTableTotPriceWithCommas() },
+              { targets: 4, render: dataTableUserName() },
+              //- { targets: [5,6,7,8], render: dataTableAmtWithCommas() },
+              { targets: 6, orderable: false, render: dataTableIsFinishActionsRenderer("./purchase-pt/edit", "#{permission.access}") }
+            ]
+        });
+
+        $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var id = button.data('id');
+          $(this).attr('data-id', id);
+          $(this).find('#dialogAccept').on('click', function(ev) {
+            var deleteUrl = '/purchase-pt/delete/' + id;
+            doDelete(deleteUrl, token, function() {
+              table.ajax.reload();
+            });
+          });
+        }).on('hide.bs.modal', function (event) {
+          $(this).attr('data-id', '');
+          $(this).find('#dialogAccept').off('click');
+        }); 
+      });

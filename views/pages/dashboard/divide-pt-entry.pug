@@ -1,0 +1,424 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/divide-pt") PTခွဲ
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm PTခွဲ
+
+  div.modal.fade.model-pt#dialogAddItems(tabindex='-1', role='dialog', aria-labelledby='AddItems')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title PT
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-2.control-label.mm(for='category_id') အမျိုးအစား
+            div.col-sm-10
+              input.form-control.model-stock-code#category(type='text', name='category',value=params.category, maxlength="55", readonly)
+              input.form-control.model-stock-code#category_id(type='hidden', name='category_id',value=params.category_id, maxlength="55", readonly)
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='code') Code
+            div.col-sm-10
+              input.form-control.model-stock-code#code(type='text', name='code',value=params.code, maxlength="55", readonly)
+              input#count(type='hidden', name='count', value=params.count)
+
+          div.form-group.row
+            label.col-sm-2.control-label.mm(for='wgt_gm') အလေးချိန်
+            div.col-sm-10
+                input.form-control.model-stock-code#wgt_gm(class='container text-right', type='number', min="0", name='wgt_gm', value=params.wgt_gm, maxlength="55", required)
+
+          div.form-group.row
+            label.col-sm-2.control-label.mm(for='price') တန်ဖိုး
+            div.col-sm-10
+              input.form-control.model-stock-code#price(class='container text-right', type='number', min="0", name='price', value=params.price, maxlength="55", required)
+          
+          div.form-group.row
+            label.col-sm-2.control-label(for='item_name') ပစ္စည်းအမည်
+            div.col-sm-10
+              input.form-control.model-stock-code#item_name(type='text', min="0", name='item_name', value=params.item_name, maxlength="55", required)
+
+          //- div.form-group.row
+          //-   label.col-sm-2.control-label(for="") ဓာတ်ပုံ
+
+          //-   div.col-sm-3
+          //-     div.form-image#imgContainer
+          //-       div.image-add-continer
+          //-         button.btn.btn-light.image-add#btnImgAdd(type="button")
+          //-           span.fa.fa-plus(aria-hidden= true)
+          //-       div.image-preview-container
+          //-         input#image(type="hidden", name="image", value=params.image)
+          //-         img.form-image-preview.image-preview
+          //-         div.image-delete-container
+          //-           a.image-delete(title='Remove')
+          //-             i.fa.fa-trash
+
+        div.modal-footer
+          button.btn.btn-primary#dialogAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogCancel(type='button', data-dismiss='modal') Cancel
+
+
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='date') ရက်စွဲ
+        div.col-sm-10
+          input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='code') PT Code
+        div.col-sm-10
+          //- select#purchase_pt_items.selectpicker.form-control(name='purchase_pt_items', value=params.purchase_pt_items, data-value=params.purchase_pt_items, data-live-search="false", data-size="20", required)
+            //- option(value="") [Select one]
+          //- input#purchase_pt_items_id(type='hidden', name='purchase_pt_items_id', value=params.purchase_pt_items_id)
+          select#purchase_pt_items_id.selectpicker.form-control(name='purchase_pt_items_id', value=params.purchase_pt_items_id, data-value=params.purchase_pt_items_id, data-live-search="false", data-size="8", required)
+            //- option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-2.control-label.mm(for='qty') အရေအတွက်
+        div.col-sm-10
+            input.form-control.model-stock-code#qty(class='container text-right', type='decimalnumber', min="0", name='qty', value=params.qty, maxlength="55", required)
+
+      div.form-group.row
+        div.col-sm-6.label-data
+          strong finished &nbsp;
+            input#isfinished(type="checkbox", name="isfinished", value=params.isfinished, checked=(params.isfinished == 1))
+
+      div.form-group.row#tblgen()
+        div.table-responsive.col-md-12
+          table#list.table.table-bordered
+            thead
+              tr
+                //- th(scope='col') Image
+                th.mm(scope='col') ပစ္စည်းအမည်
+                th(scop='col') Code
+                th.mm(scope='col') အမျိုးအစား
+                th.mm(scope='col') အလေးချိန်
+                th.mm(scope='col') တန်ဖိုး
+                th.mm.edit-hidden(scope='col')
+                  a.btn.btn-success.list-action-text#btngeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddItems")
+                    i.fa.fa-plus
+            tbody#tbody
+              input#item_array(type='hidden', name='item_array', value=item_array)
+            
+              each item, index in item_array
+                tr
+                  //- td
+                  //-   img(src=`/file/stream?file=${item.image}`, alt="", height="50px", weight="50px")
+                  td
+                    span=item.item_name
+                  td
+                    span=item.code
+                  td
+                    span=item.category
+                  td
+                    span=item.wgt_gm
+                  td
+                    span=item.price
+                  td.edit-hidden
+                    button.btn.btn-danger.btn-xs.btn-delete Delete
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+
+  //- script(src='/js/upload.js')
+  //- script(src='/js/scripts-upload.js')
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var category = "";
+      var count = 0;
+      var qty = 0;
+      var item_array = [];
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-divide-pt').addClass('active');
+      $('div#production_subitems').addClass('show');
+      $(".edit-hidden").hide();
+      var _tmp = $("#recordid").val();
+      var isfinished = $("#isfinished").val();
+      if (_tmp != "" && isfinished == 1) {
+        document.getElementById('date').setAttribute("readonly", "");
+        document.getElementById('qty').setAttribute("readonly", "");
+        //- document.getElementById('pay_wgt_gm').setAttribute("readonly", "");
+        //- document.getElementById('get_wgt_gm').setAttribute("readonly", "");
+        //- document.getElementById('remain_wgt_gm').setAttribute("readonly", "");
+        document.getElementById('isfinished').setAttribute("disabled", true);
+
+        $("#submitBtn").hide();
+        $(".edit-hidden").hide();
+      }
+      if (_tmp == '') {
+        //- submitBtn.setAttribute("disabled", "");
+      } else {
+        //- document.getElementById('purchase_pt_items').setAttribute("disabled", true);
+        item_array = JSON.parse($("#item_array").val());
+        qty = $("#qty").val();
+        qty = qty - Number(item_array.length);
+        if (qty > 0) {
+          $(".edit-hidden").show();
+          getCount();
+        }
+      }
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      //- $purchase_pt_items_id = "!{params.purchase_pt_items_id}";
+      $purchase_pt_items_id = $("#purchase_pt_items_id").val();
+      console.log("purchase pt item ", $purchase_pt_items_id);
+      //- $('#purchase_pt_items').Template({
+      //-   "template": "<option value='${=id}'>${=code}</option>",
+      //-   "ajax": {
+      //-     "url": "/api/itemview/getPurchasePtItems?purchase_pt_items_id=" + $purchase_pt_items_id,
+      //-     "headers": {"authorization": "Bearer " + token},
+      //-     "dataSrc": "data"
+      //-   }
+      //- }).on('completed', function() {
+      //-   var selectedVal = $('#purchase_pt_items').data('value');
+      //-   if (selectedVal) {
+      //-     $('#purchase_pt_items').selectpicker('val', selectedVal);
+      //-   }
+      //-   $('#purchase_pt_items').selectpicker('refresh');
+      //- });
+
+      //- $('#purchase_id').Template({
+      //-   "template": "<option value='${=id}'>${=mo_code}</option>",
+      //-   "ajax": {
+      //-     "url": "/api/purchaseview/getMouldCode?id="+purchase_id,
+      //-     "headers": {"authorization": "Bearer " + token},
+      //-     "dataSrc": "data"
+      //-   }
+      //- }).on('completed', function() {
+      //-   var selectedVal = $('#purchase_id').data('value');
+      //-   if (selectedVal) {
+      //-     $('#purchase_id').selectpicker('val', selectedVal);
+      //-   }
+      //-   $('#purchase_id').selectpicker('refresh');
+      //- });
+
+      $('#purchase_pt_items_id').Template({
+        "template": "<option value='${=id}'>${=code}</option>",
+        "ajax": {
+          "url": "/api/itemview/getPurchasePtItems?purchase_pt_items_id=" + $purchase_pt_items_id,
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "data"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#purchase_pt_items_id').data('value');
+        if (selectedVal) {
+          $('#purchase_pt_items_id').selectpicker('val', selectedVal);
+        }
+        $('#purchase_pt_items_id').selectpicker('refresh');
+      });
+
+      //- $("#purchase_pt_items").change(function() {
+      //-   console.log("purchase pt change");
+      //-   console.log("items ", $('#purchase_pt_items option:selected').val());
+      //-   document.getElementById('purchase_pt_items').setAttribute("disabled", true);
+      //-   $.ajax({
+      //-     url: "/api/itemview/getCategoryByDividePT?item_id=" +  $('#purchase_pt_items option:selected').val(),
+      //-     headers: {"authorization": "Bearer " + token},
+      //-     success: function(result) {
+      //-       console.log("result ", result);
+      //-       $("#category_id").val(result.category_id);
+      //-       $("#category").val(result.category_name);
+      //-       if (_tmp == "") {
+      //-         $("#qty").val(result.current_qty);
+      //-         qty = result.current_qty;
+      //-         if (qty > 0) {
+      //-           $(".edit-hidden").show();
+      //-         }
+      //-       }
+            
+      //-       $("#purchase_pt_items_id").val($('#purchase_pt_items option:selected').val());
+      //-       category = result.category_code;
+      //-       getCount();
+      //-       //- if (isfinished == 0 || "on") {
+      //-       //-   $(".edit-hidden").show();
+      //-       //- }
+      //-     }
+      //-   })
+      //- });
+
+      $("#purchase_pt_items_id").change(function() {
+        //- document.getElementById('purchase_pt_items').setAttribute("disabled", true);
+        $.ajax({
+          url: "/api/itemview/getCategoryByDividePT?item_id=" +  $('#purchase_pt_items_id option:selected').val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            $("#category_id").val(result.category_id);
+            $("#category").val(result.category_name);
+            if (_tmp == "") {
+              $("#qty").val(result.current_qty);
+              qty = result.current_qty;
+              console.log("qty ", qty);
+              if (qty > 0) {
+                $(".edit-hidden").show();
+              }
+            }
+            
+            //- $("#purchase_pt_items_id").val($('#purchase_pt_items option:selected').val());
+            category = result.category_code;
+            getCount();
+            //- if (isfinished == 0 || "on") {
+            //-   $(".edit-hidden").show();
+            //- }
+          }
+        })
+      });
+
+      function getCount() {
+        if (category != "") {
+          code = "BPT" + category;
+          $.ajax({
+            url: "/api/itemview/getCodeCount?code=" +  code,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result) {
+              if (result != undefined) {
+                const data = result.code.split(code);
+                count = Number(data[1]) + 1;
+              } else {
+                count = 1;
+              }
+            }
+          })
+        }
+      }
+
+      $("#list").on("click", ".btn-delete", function(ev){
+        item_array = JSON.parse($("#item_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        //- $cost = item_array[index].cost;
+        //- $total_price = Number($("#total_price").val());
+        //- $total_price -= Number($cost);
+        //- $("#total_price").val($total_price);
+        qty++;
+        if (qty > 0) {
+          $(".edit-hidden").show();
+        }
+        item_array.splice(index,1);
+        $(this).parents("tr").remove();
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#btngeneral").on("click", function(ev) {
+        isEdit = false;
+        ev.preventDefault();
+        var target = $(this).attr("href");
+        $("#code").val(code + count);
+        $("#count").val(count);
+        $("#wgt_gm").val("");
+        $("#price").val("");
+        $("#item_name").val("");
+        //- $('#image').attr('src', '');
+      });
+
+      $("#dialogAccept").on("click", function(ev) {
+        ev.preventDefault();
+        count++;
+        qty--;
+        if (qty == 0) {
+          $(".edit-hidden").hide();
+        }
+        $category_id = $("#category_id").val();
+        $category = $("#category").val();
+        $code = $("#code").val();
+        $count = $("#count").val();
+        $wgt_gm = $("#wgt_gm").val();
+        $price = $("#price").val();
+        $item_name = $("#item_name").val();
+        //- $image = $("#image").val();
+        //- var item = {"category_id": $category_id, "code": $code, "wgt_gm": $wgt_gm, "price": $price, "item_name": $item_name, "image": $image };
+        var item = {"category_id": $category_id, "code": $code, "count": $count, "wgt_gm": $wgt_gm, "price": $price, "item_name": $item_name };
+        item_array.push(item);
+        //- markup = "<tr><td><img src='/file/stream?file="+$image+"', alt='', height='50px', weight='50px'></td><td>" + $item_name + "</td><td>"+ $category +"</td><td>" + $code + "</td><td>" +$wgt_gm+ "</td><td>" + $price + "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+        markup = "<tr><td>" + $item_name + "</td><td>" + $code + "</td><td>"+ $category +"</td><td>" +$wgt_gm+ "</td><td>" + $price + "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+        tablebody = $("#list #tbody");
+        tablebody.append(markup);
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#isfinished").change(function() {
+        if(this.checked) {
+          $("#isfinished").val("on");
+        } else {
+          $("#isfinished").val("");
+        }
+      });
+
+      //- $('a.image-delete').on('click', function(ev) {
+      //-   if (confirm('Are you sure to remove this image?')) {
+      //-     $("#image").val('');
+      //-     $('img.image-preview').attr('src', '');
+      //-     $('.image-add-continer').show();
+      //-     $('.image-preview-container').hide();
+      //-   }
+      //- });
+      //- imageUpload('#imgContainer', '#image', 'item');
+
+      $("#submitBtn").click(function() {
+        //- $("#submitBtn").setAttribute("disabled", "");
+        $("#submitBtn").hide();
+      });
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+    });

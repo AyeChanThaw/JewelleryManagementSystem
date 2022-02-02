@@ -1,0 +1,99 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm အဝယ်
+  h1.page-header-mm အဝယ်
+  include ../../includes/delete-confirm
+  include ../../includes/broken-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Date
+          th Voucher No.
+          th Reference No.
+          th Cashier Name
+          th Gold Total
+          th Brass Total
+          th Silver Total
+          th Mo Total
+          th Finished
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./purchase/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody 
+    script.
+      $(document).ready(function() {
+        var token = "!{token}";
+        $('div.sidebar-sticky li.nav-item').removeClass('active');
+        $('li#menu-purchase').addClass('active');  
+        $('div#purchase_subitems').addClass('show');       
+
+        $.fn.dataTable.ext.errMode = 'none';
+        var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+          }).DataTable({
+            "autoWidth": true,
+            "ajax": { 
+              "url": "/api/purchaseview/getPurchase",
+              "headers": {"authorization": "Bearer " + token},
+              "dataSrc": "data"
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "purchase_date" },
+                { "data": "voc_no" },
+                { "data": "ref_no"},
+                { "data": "username" },
+                { "data": "gold_total" },
+                { "data": "brass_total" },
+                { "data": "silver_total" },
+                { "data": "mo_total" },
+                { "data": "finished" },
+                { "data": "actions", "className": "nowrap" }
+            ],
+            "columnDefs": [
+              { targets: 0, render: dataTableIndexRenderer() },
+              { targets: 1, render: dataTableDateRenderer() },
+              { targets: 4, render: dataTableUsername() },
+              //- { targets: [5,6,7,8], render: dataTableAmtWithCommas() },
+              { targets: 10, orderable: false, render: dataTablePurchaseActionsRenderer("./purchase/edit", "#{permission.access}") }
+            ]
+        });
+
+        $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var id = button.data('id');
+          $(this).attr('data-id', id);
+          $(this).find('#dialogAccept').on('click', function(ev) {
+            var deleteUrl = '/purchase/delete/' + id;
+            doDelete(deleteUrl, token, function() {
+              table.ajax.reload();
+            });
+          });
+        }).on('hide.bs.modal', function (event) {
+          $(this).attr('data-id', '');
+          $(this).find('#dialogAccept').off('click');
+        }); 
+
+        $('#dialogBrokenConfirm').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var id = button.data('id');
+          $(this).attr('data-id', id);
+          $(this).find('#dialogAccept').on('click', function(ev) {
+            var brokenUrl = '/purchase/broken/' + id;
+            doBroken(brokenUrl, token, function() {
+              table.ajax.reload();
+            });
+          });
+        }).on('hide.bs.modal', function (event) {
+          $(this).attr('data-id', '');
+          $(this).find('#dialogAccept').off('click');
+        }); 
+      });

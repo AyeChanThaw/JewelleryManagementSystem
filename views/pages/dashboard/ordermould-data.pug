@@ -1,0 +1,82 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm အထည်ကြမ်း
+  h1.page-header-mm အထည်ကြမ်း
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th Code
+          th.mm အမျိုးအစား
+          th.mm ပဲရည်
+          th.mm ရွှေသား
+          th.mm အထည်ကြမ်း
+          th.mm အပင်တံ
+          th.mm အလျော့
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./ordermould-dataentry/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-ordermould-dataentry').addClass('active');
+      $('div#dataentry_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/ordermould_dataentry?columns=ordermould_dataentry.*,category.category_name,goldsmith_code.status,goldsmith_code.use_status&join=left,category,category_id,eq,category.id&join=left,goldsmith_code,ordermould_dataentry.id,eq,goldsmith_code.order_mould_item_id&order=date,desc",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "ordermould_dataentry"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "date" },
+              { "data": "code" },
+              { "data": "category_name" },
+              { "data": "goldrate" },
+              { "data": "gold_wgt_gm" },
+              { "data": "wgt_gm" },
+              { "data": "return_wgt_gm" },
+              { "data": "reduce_wgt_gm" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 4, render: dataTableGoldrate() },
+            { targets: 9, orderable: false, render: dataTableOrderMouldActionsRenderer("./ordermould-dataentry/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/ordermould-dataentry/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

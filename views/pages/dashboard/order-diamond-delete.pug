@@ -1,0 +1,70 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm ဖျက်ထားသော စရံ(စိန်)
+  h1.page-header-mm ဖျက်ထားသော စရံ(စိန်)
+  include ../../includes/recover-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th.mm User
+          th.mm စရံ ဘောက်ချာ
+          th.actions-4
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-order-diamond-delete').addClass('active');
+      $('div#sale_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": {
+            "url": "/api/order_diamond?columns=order_diamond.*,user.username&filter=is_delete,eq,1&join=left,user,deleted_user_id,eq,user.id",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "order_diamond"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "deleted_date" },
+              { "data": "user_name" },
+              { "data": "voc_no" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 2, render: dataTableDeleteUser() },
+            { targets: 4, orderable: false, render: dataTableRecoverActionsRenderer("#{permission.access}") }
+          ]
+      });
+
+      $('#dialogRecoverConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var recoverUrl = '/order-diamond-delete/recover/' + id;
+          doRecover(recoverUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

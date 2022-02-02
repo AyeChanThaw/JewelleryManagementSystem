@@ -1,0 +1,119 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/sale-person") Sale Person
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header Sale Person Entry
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+
+      div.form-group.row
+        label.col-sm-3.control-label(for='sale_person_name') Sale Person
+        div.col-sm-9
+          input.form-control#sale_person_name.mm(type='text', name='sale_person_name', value=params.sale_person_name, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-3.control-label(for='branch_id') Branch
+        div.col-sm-9
+          select#branch_id.selectpicker.form-control(name='branch_id', value=params.branch_id, data-value=params.branch_id, data-live-search="true", data-size="8")
+            option(value="") [Select one]
+
+      div.form-group.row
+        label.col-sm-3.control-label.pt-2(for='password') Password
+        div.col-sm-9
+          input.form-control#password(type='password', name='password', maxlength="255", required)
+
+      div.text-right#cf-pass
+      div.form-group.row
+        label.col-sm-3.control-label.pt-2(for='password') Confirm Password
+        div.col-sm-9
+          input.form-control#confirm_password(type='password', name='confirm_password', maxlength="255", required)
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-sale-person').addClass('active');
+      $('div#setup_subitems').addClass('show');
+      $("#cf-pass").hide();
+
+      var _tmp = $("#recordid").val();
+      if (_tmp == '') {
+        console.log("Entry Form");
+        $("#sale_person_name").val("");
+        $("#password").val("");
+      }
+
+      $('#branch_id').Template({
+        "template": "<option value='${=id}'>${=branch_name}</option>",
+        "ajax": {
+          "url": "/api/branch",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "branch"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#branch_id').data('value');
+        if (selectedVal) {
+          $('#branch_id').selectpicker('val', selectedVal);
+        }
+        $('#branch_id').selectpicker('refresh');
+      });
+
+      $("#confirm_password").on('change keyup',function(){
+        var ori = $("#password").val();
+        var cf = $("#confirm_password").val();
+        if (ori === cf && ori.length == cf.length) $("#cf-pass").html(" * Password match!").removeClass('text-danger').addClass('text-success').show();
+        else $("#cf-pass").html(" * Password does not match!").removeClass('text-success').addClass('text-danger').show();
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

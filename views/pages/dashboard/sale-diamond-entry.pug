@@ -1,0 +1,1073 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/sale-diamond") အရောင်း (စိန်)
+    li.breadcrumb-item.active
+      span.mm အရောင်း (စိန်)
+  h1.page-header.mm အရောင်း (စိန်)
+
+  div.modal.fade.model-diamond#dialogAddPayments(tabindex='-1', role='dialog', aria-labelledby='AddPayments')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title ငွေပေးချေမှု
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-2.control-label(for='payment_type') Payment Type
+            div.col-sm-10
+              select#payment_type.selectpicker.form-control(name='payment_type', value=params.payment_type, data-value=params.payment_type, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+                option(value="bank") Bank
+                option(value="cash") Cash
+
+          div.form-group.row.bank_form
+            label.col-sm-2.control-label(for='bank_id') Bank Name
+            div.col-sm-10
+              select#bank_id.selectpicker.form-control(name='bank_id', value=params.bank_id, data-value=params.bank_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+            
+          div.form-group.row.bank_form
+            label.col-sm-2.control-label(for='account') Account
+            div.col-sm-10
+              input.form-control.model-stock-account#account(type='text', name='account',value=params.account, maxlength="55")
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='amount') Amount
+            div.col-sm-10
+              input.form-control.model-stock-code#amount(class='container text-right', type='number', min="0", name='amount', value=params.amount, maxlength="55", required)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogCancel(type='button', data-dismiss='modal') Cancel
+
+  div.modal.fade.model-diamond#dialogAddItems(tabindex='-1', role='dialog', aria-labelledby='AddItems')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title အရောင်းပစ္စည်း
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-item-body
+          div.form-group.row
+            label.col-sm-2.control-label(for='item_id') Code
+            div.col-sm-10
+              input.form-control.model-stock-code#code(type='text', name='code', value=params.code, maxlength="55", required)
+              input#item_id(type='hidden', name='item_id', value=params.item_id)
+            
+          div.form-group.row
+            label.col-sm-2.control-label(for='code') ပစ္စည်း
+            div.col-sm-10
+              input.form-control.model-stock-code#item_name(type='text', name='item_name',value=params.item_name, maxlength="55")
+              input#image(type="hidden", name="image", value=params.image)
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='wgt_gm') အလေးချိန်
+            div.col-sm-10
+              input.form-control.model-stock-wgt_gm#wgt_gm(type='text', name='wgt_gm',value=params.wgt_gm, maxlength="55")
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='diamond_qty') စိန်ပွင့်ရေ
+            div.col-sm-10
+              input.form-control.model-stock-code#diamond_qty(class='container text-right', type='decimalnumber', min="0", name='diamond_qty', value=params.diamond_qty, maxlength="55", required)
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='price') တန်ဖိုး
+            div.col-sm-10
+              input.form-control.model-stock-code#price(class='container text-right', type='decimalnumber', min="0", name='price', value=params.price, maxlength="55", required)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogItemAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogItemCancel(type='button', data-dismiss='modal') Cancel
+
+  div.modal.fade.model-diamond#dialogAddOrders(tabindex='-1', role='dialog', aria-labelledby='AddOrders')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title စရံ
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-2.control-label(for='order_diamond_id') စရံ Voucher
+            div.col-sm-10
+              select#order_diamond_id.selectpicker.form-control(name='order_diamond_id', value=params.order_diamond_id, data-value=params.order_diamond_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='order_amount') စရံငွေ
+            div.col-sm-10
+              input.form-control.model-stock-code#order_amount(class='container text-right', type='decimalnumber', min="0", name='order_amount', value=params.order_amount, maxlength="55", readonly)
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='order_description') အကြောင်းအရာ
+            div.col-sm-10
+              input.form-control.model-stock-account#order_description(type='text', name='order_description',value=params.order_description, readonly)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogOrderAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogOrderCancel(type='button', data-dismiss='modal') Cancel
+
+  div.modal.fade.model-diamond#dialogAddChanges(tabindex='-1', role='dialog', aria-labelledby='AddChanges')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title ပြန်လဲ
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-2.control-label(for='change_voc_no') ပြန်လဲ Voucher
+            div.col-sm-10
+              select#change_diamond_id.selectpicker.form-control(name='change_diamond_id', value=params.change_diamond_id, data-value=params.change_diamond_id, data-live-search="false", data-size="20", required)
+                option(value="") [Select one]
+
+          div.form-group.row
+            label.col-sm-2.control-label(for='change_amount') ပြန်အမ်းငွေ
+            div.col-sm-10
+              input.form-control.model-stock-code#change_amount(class='container text-right', type='decimalnumber', min="0", name='change_amount', value=params.change_amount, maxlength="55", readonly)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogChangeAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogChangeCancel(type='button', data-dismiss='modal') Cancel
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#customers(type='hidden', name='customers', value=params.customers)
+      input#items(type='hidden', name='items', value=params.items)
+      input#current_rate(type='hidden', name='current_rate', value=params.current_rate)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      
+      div.form-group.row
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='date') ရက်စွဲ
+          div.col-sm-8
+            input.form-control.fromdate#date(type='text', name='date', value=params.date, required)
+        div.row.col-sm-6
+          label.col-sm-4.control-label(for='voc_no') Voc No
+          div.col-sm-8
+            input.form-control#voc_no.mm(type='text', name='voc_no', value=params.voc_no, maxlength="55", readonly)
+
+      div.form-group.row
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='customer_code') Customer ID
+          div.col-sm-8
+            input.form-control.model-stock-code#customer_code(type='text', name='customer_code', value=params.customer_code, maxlength="55", required)
+            input#customer_id(type='hidden', name='customer_id', value=params.customer_id)
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='customer_name') Customer နာမည်
+          div.col-sm-8
+            input.form-control.model-stock-code#customer_name(type='text', name='customer_name', value=params.customer_name, maxlength="55", required)
+
+      div.form-group.row
+        div.row.col-sm-6
+          label.col-sm-4.control-label.mm(for='phone') ဖုန်းနံပါတ်
+          div.col-sm-8
+            input.form-control.model-stock-code#phone(type='number', name='phone', value=params.phone, maxlength="55", required)
+        div.row.col-sm-6
+          label.col-sm-4.control-label(for='sale_person_id') Sale Person
+          div.col-sm-8.label-data
+            select#sale_person_id.selectpicker.form-control(name='sale_person_id', value=params.sale_person_id, data-value=params.sale_person_id, data-live-search="false", data-size="20", required)
+              option(value="") [Select one]
+
+      div.card
+        div.card-body
+          h3.card-title.mm ပစ္စည်းစာရင်း
+          div.form-group.row#tblgen()
+            div.table-responsive.col-md-12
+              table#itemlist.table.table-bordered
+                thead
+                    tr
+                      th.mm(scope='col') Code
+                      th.mm Photo
+                      th.mm(scope='col') ပစ္စည်း
+                      th.mm(scope='col') အလေးချိန်
+                      th.mm(scope='col') စိန်ပွင့်ရေ
+                      th.mm(scope='col') တန်ဖိုး
+                      th.mm.edit-hidden(scope='col') 
+                        a.btn.btn-success.list-action-text#btnitemgeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddItems")
+                          i.fa.fa-plus
+                tbody#tbody-item
+                  input#item_array(type='hidden', name='item_array', value=item_array)
+                
+                  each item, index in item_array
+                    tr
+                      td
+                        span=item.code
+                      td
+                        img(src=`/file/stream?file=${item.image}`, alt="", height="50px", weight="50px")
+                      td
+                        span=item.item_name
+                      td
+                        span=item.wgt_gm
+                      td
+                        span=item.qty
+                      td
+                        span=item.price
+                      td.edit-hidden
+                        button.btn.btn-danger.btn-xs.btn-delete Delete
+
+      div.card
+        div.card-body 
+          h3.card-title.mm ငွေပေးချေမှု
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='total_amount') ကျသင့်ငွေ
+              div.col-sm-8
+                input.form-control#total_amount(class='container text-right', type='decimalnumber', min="0", name='total_amount', value=params.total_amount, readonly)
+
+          div.form-group.row
+            div.col-sm-6.label-data
+              strong.mm စရံ &nbsp;
+                input#is_order(type="checkbox", name="is_order", value=params.is_order, checked=(params.is_order == 1))
+                input#order_total_amount(type="hidden", name="order_total_amount", value=params.order_total_amount)
+
+          div.form-group.row.order-form#tblgen()
+            div.table-responsive.col-md-12
+              table#orderlist.table.table-bordered
+                thead
+                    tr
+                    th.mm(scope='col') စရံ Voucher
+                    th.mm(scope='col') စရံငွေ
+                    th.mm(scope='col') အကြောင်းအရာ
+                    th.mm.edit-hidden(scope='col') 
+                      a.btn.btn-success.list-action-text#btnordergeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddOrders")
+                        i.fa.fa-plus
+                tbody#tbody-order
+                  input#order_array(type='hidden', name='order_array', value=order_array)
+                
+                  each order, index in order_array
+                    tr
+                      td
+                        span=order.order_voc_no
+                      td
+                        span=order.order_amount
+                      td 
+                        span=order.order_description
+                      td.edit-hidden
+                        button.btn.btn-danger.btn-xs.btn-delete Delete
+
+          div.form-group.row
+            div.col-sm-6.label-data
+              strong.mm ပြန်လဲ &nbsp;
+                input#is_change(type="checkbox", name="is_change", value=params.is_change, checked=(params.is_change == 1))
+                input#change_total_amount(type="hidden", name="change_total_amount", value=params.change_total_amount)
+
+          div.form-group.row.change-form#tblgen()
+            div.table-responsive.col-md-12
+              table#changelist.table.table-bordered
+                thead
+                    tr
+                      th.mm(scope='col') ပြန်လဲ Voucher
+                      th.mm(scope='col') ပြန်အမ်းငွေ
+                      th.mm.edit-hidden(scope='col') 
+                        a.btn.btn-success.list-action-text#btnchangegeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddChanges")
+                          i.fa.fa-plus
+                tbody#tbody-change
+                  input#change_array(type='hidden', name='change_array', value=change_array)
+                
+                  each change, index in change_array
+                    tr
+                      td
+                        span=change.change_voc_no
+                      td
+                        span=change.change_amount
+                      td.edit-hidden
+                        button.btn.btn-danger.btn-xs.btn-delete Delete
+
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='discount_amount') Discount
+              div.col-sm-8
+                input.form-control#discount_amount(class='container text-right', type='decimalnumber', min="0", name='discount_amount', value=params.discount_amount, required)
+
+          div.form-group.row
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='subtotal') ကျန်ငွေ
+              div.col-sm-8
+                input.form-control#subtotal(class='container text-right', type='decimalnumber', min="0", name='subtotal', value=params.subtotal, readonly)
+          
+          div.form-group.row.profit-form
+            div.row.col-sm-6
+              label.col-sm-4.control-label(for='profit_percentage') အမြတ် %
+              div.col-sm-8
+                input.form-control.model-stock-code#profit_percentage(type='number', name='profit_percentage', value=params.profit_percentage, maxlength="55")
+
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='profit_amount') အမြတ်
+              div.col-sm-8
+                input.form-control#profit_amount(class='container text-right', type='decimalnumber', min="0", name='profit_amount', value=params.profit_amount, readonly)
+
+          div.text-right#check-total-amount
+          div.form-group.row#tblgen()
+            div.table-responsive.col-md-12
+              table#list.table.table-bordered
+                thead
+                  tr
+                    th(scope='col') Payment Type
+                    th(scope='col') Bank
+                    th(scope='col') Account
+                    th(scope='col') Amount
+                    th.mm.edit-hidden(scope='col') 
+                      a.btn.btn-success.list-action-text#btngeneral(href="#", role="button", title="Add", data-toggle="modal", data-target="#dialogAddPayments")
+                        i.fa.fa-plus
+                tbody#tbody
+                  input#payment_array(type='hidden', name='payment_array', value=payment_array)
+                
+                  each payment, index in payment_array
+                    tr
+                      td
+                        span=payment.payment_type
+                      td
+                        span=payment.bank_name
+                      td
+                        span=payment.account
+                      td 
+                        span=payment.amount
+                      td.edit-hidden
+                        button.btn.btn-danger.btn-xs.btn-delete Delete
+
+          div.form-group.row
+            div.col-sm-6.label-data
+              strong အကြွေး &nbsp;
+                input#is_debt(type="checkbox", name="is_debt", value=params.is_debt, checked=(params.is_debt == 1))
+
+          div.form-group.row.debt-form
+            div.row.col-sm-6
+              label.col-sm-4.control-label.mm(for='debt_amount') အကြွေး
+              div.col-sm-8
+                input.form-control#debt_amount(class='container text-right', type='decimal', min="0", name='debt_amount', value=params.debt_amount, readonly)
+
+          div.form-group.row
+            label.col-sm-4.control-label(for='delivery_type') Delivery Type
+            div.col-sm-6
+              select#delivery_type.selectpicker.form-control(name='delivery_type', value=params.delivery_type, data-value=params.delivery_type, data-live-search="false", data-size="3", required)
+                option(value="") [Select one]
+                option(value="pickup") ကိုယ်တိုင်ယူ
+                option(value="delivery") Deliveryအပ်
+
+          div.form-group.row.delivery-form
+            label.col-sm-4.control-label.mm(for='delivery_address') လိပ်စာ
+            div.col-sm-8
+              textarea.form-control.mm#delivery_address(name='delivery_address')= params.delivery_address
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-sale-diamond').addClass('active');
+      $('div#sale_subitems').addClass('show');
+      //- $("#btnitemgeneral").hide();
+      $("#submitBtn").hide();
+      $("#check-total-amount").hide();
+      $(".order-form").hide();
+      $(".change-form").hide();
+      $(".debt-form").hide();
+      $(".delivery-form").hide();
+      $(".profit-form").hide();
+      $(".bank_form").hide();
+
+      var payment_array = [];
+      var item_array = [];
+      var order_array = [];
+      var change_array = [];
+      var _tmp = $("#recordid").val();
+      var total_amount = 0;
+      var total_payment = 0;
+      var order_total_amount = 0;
+      var change_total_amount = 0;
+      if (_tmp != "") {
+        document.getElementById('customer_code').setAttribute("readonly", "");
+        document.getElementById('customer_name').setAttribute("readonly", "");
+        document.getElementById('phone').setAttribute("readonly", "");
+        document.getElementById('current_rate').setAttribute("readonly", "");
+        item_array = JSON.parse($("#item_array").val());
+        item_array.forEach((item) => {
+          total_amount += Number(item.price);
+        });
+        payment_array = JSON.parse($("#payment_array").val());
+        payment_array.forEach((payment) => {
+          total_payment += Number(payment.amount);
+        });
+        $("#btnitemgeneral").show();
+        if ($("#is_order").val() == 1) {
+          $("#is_order").val("on");
+          $(".order-form").show();
+        }
+        if ($("#is_change").val() == 1) {
+          $("#is_change").val("on");
+          $(".change-form").show();
+        }
+        if ($("#is_debt").val() == 1) {
+          $("#is_debt").val("on");
+          $(".debt-form").show();
+        }
+        $("#submitBtn").show();
+      } else {
+        $("#discount_amount").val(0);
+      }
+
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $('#sale_person_id').Template({
+        "template": "<option value='${=id}'>${=sale_person_name}</option>",
+        "ajax": {
+          "url": "/api/sale_person",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "sale_person"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#sale_person_id').data('value');
+        if (selectedVal) {
+          $('#sale_person_id').selectpicker('val', selectedVal);
+        }
+        $('#sale_person_id').selectpicker('refresh');
+      });
+
+      $("#is_order").change(function() {
+        if(this.checked) {
+          $("#is_order").val("on");
+          $(".order-form").show();
+        } else {
+          $("#is_order").val("");
+          $(".order-form").hide();
+          order_array = [];
+          $("#order_total_amount").val(0);
+          calcSubtotal();
+          $("#tbody-order").remove();
+        }
+      });
+
+      $("#is_change").change(function() {
+        if(this.checked) {
+          $("#is_change").val("on");
+          $(".change-form").show();
+        } else {
+          $("#is_change").val("");
+          $(".change-form").hide();
+          change_array = [];
+          $("#change_total_amount").val(0);
+          calcSubtotal();
+          $("#tbody-change").remove();
+        }
+      });
+
+      $("#is_debt").change(function() {
+        if(this.checked) {
+          $("#is_debt").val("on");
+          $(".debt-form").show();
+          $("#submitBtn").show();
+          $subtotal = $("#subtotal").val();
+          $subtotal_no_comma = $subtotal.replace(/,/g, '');
+          $debt_amount = Number($subtotal_no_comma) - Number(total_payment);
+          $debt_amount_comma = commaSeparateNumber($debt_amount);
+          $("#debt_amount").val($debt_amount_comma);
+        } else {
+          $("#is_debt").val("");
+          $(".debt-form").hide();
+          $("#debt_amount").val("");
+          if ($("#subtotal").val() != total_payment) {
+            $("#submitBtn").hide();
+          }
+        }
+      });
+
+      $("#discount_amount").change(function() {
+        calcSubtotal();
+        calcProfit();
+      });
+
+      $("#profit_percentage").change(function() {
+        $subtotal_no_comma = $("#subtotal").val().replace(/,/g, '');
+        $subtotal_no_comma = Number(Math.abs($subtotal_no_comma));
+        $profit_percentage = $("#profit_percentage").val();
+        $profit_amt = $subtotal_no_comma * ($profit_percentage / 100);
+        $profit_amt_comma = commaSeparateNumber($profit_amt);
+        $("#profit_amount").val($profit_amt_comma);
+        $subtotal_no_comma += Number($profit_amt);
+        $subtotal_comma = commaSeparateNumber($subtotal_no_comma);
+      });
+
+      $("#delivery_type").change(function() {
+        if ($("#delivery_type").val() == 'delivery') {
+          $(".delivery-form").show();
+        } else {
+          $(".delivery-form").hide();
+        }
+      });
+
+      $("#payment_type").change(function() {
+        $payment_type = $("#payment_type").val();
+        if ($payment_type == 'bank') {
+          $(".bank_form").show();
+        } else {
+          $(".bank_form").hide();
+          $("#bank_id").val('');
+          $("#account").val('');
+        }
+      });
+
+      $("#bank_id").change(function() {
+        $.ajax({
+          url: "/api/bank?filter=id,eq," + $("#bank_id").val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            $("#account").val(result.bank[0].account);
+          }
+        })
+      });
+
+     function calcSubtotal() {
+        $order_total_amount = $("#order_total_amount").val() == "" ? 0 : Number($("#order_total_amount").val());
+        $change_total_amount = $("#change_total_amount").val() == "" ? 0 : Number($("#change_total_amount").val());
+        $discount_amount = $("#discount_amount") == "" ? 0 : $("#discount_amount").val();
+        $discount_amount_no_comma = Number($discount_amount.replace(/,/g, ''));
+        $subtotal = total_amount - ($discount_amount_no_comma + $order_total_amount + $change_total_amount);
+        if ($subtotal < 0) {
+          $(".profit-form").show();
+          $("#submitBtn").show();
+        } else {
+          $(".profit-form").hide();
+          $("#profit_percentage").val(0);
+          $("#profit_amount").val(0);
+        }
+        $subtotal_comma = commaSeparateNumber($subtotal);
+        $("#subtotal").val($subtotal_comma);
+        if ($("#debt_amount").val() && $("#debt_amount").val() != "") {
+          $debt_amount = Number($subtotal) - Number(total_payment);
+          $debt_amount_comma = commaSeparateNumber($debt_amount);
+          $("#debt_amount").val($debt_amount_comma);
+        } else {
+          if ($subtotal != total_payment) {
+            $("#submitBtn").hide();
+          }
+        }
+        if ($subtotal > 0) {
+          if (total_payment > $subtotal) {
+            $("#check-total-amount").html("Payment Amount is Over!").addClass('text-danger').show();
+          }
+        } else {
+          $("#submitBtn").show();
+        }
+      }
+
+      function calcProfit() {
+        $discount_amount = $("#discount_amount").val();
+        $subtotal = Number(total_amount) - (Number(order_total_amount) + Number(change_total_amount) + Number($discount_amount));
+        if ($subtotal < 0) {
+          $profit_percentage = $("#profit_percentage").val();
+          if ($profit_percentage == "" || $profit_percentage == 0) {
+            $("#profit-form").show();
+          } else {
+            $profit_amount = Math.abs($subtotal) * ($profit_percentage / 100);
+            $profit_amt_comma = commaSeparateNumber($profit_amount);
+            $("#profit_amount").val($profit_amt_comma);
+          }
+        } else {
+          $("#profit-form").hide();
+          $("#profit_amount").val(0);
+          $("#profit_percentage").val(0);
+        }
+      }
+
+      function commaSeparateNumber(val){
+        while (/(\d+)(\d{3})/.test(val.toString())){
+          val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+        }
+        return val;
+      }
+
+      const customers = JSON.parse($("#customers").val());
+      $("#customer_code").autocomplete({
+        source: customers,
+        minLength: 1,
+        select: function (event, cus) {
+          event.preventDefault();
+          var selectedCus = cus.item.value;
+          $("#customer_id").val('');
+          $("#customer_code").val('');
+           $("#customer_name").val('');
+          $("#phone").val('');
+          $.ajax({
+            "url": "/api/customerview/getCustomerById?id="+selectedCus,
+            "headers": {"authorization": "Bearer " + token},
+            success: function(result){ 
+              $("#customer_id").val(result.customer[0].id);
+              $("#customer_code").val(result.customer[0].code);
+              $("#customer_name").val(result.customer[0].customer_name);
+              $("#phone").val(result.customer[0].phone);
+            }
+          });
+        },
+        focus: function(event, cus) {
+          event.preventDefault();
+          $("#customer_code").val(cus.item.label);
+        }
+      });
+
+      const modal = $(".modal-item-body");
+      const items = JSON.parse($("#items").val());
+      $("#code").autocomplete({
+        source: items,
+        appendTo : modal,
+        minLength: 1,
+        select: function (event, item) {
+          event.preventDefault();
+          var selectedItem = item.item.label;
+          $("#code").val(selectedItem);
+          $.ajax({
+            url: "/api/item?filter=id,eq," + item.item.value,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result) {
+              $("#item_name").val(result.item[0].item_name);
+              $("#image").val(result.item[0].image);
+              $("#wgt_gm").val(result.item[0].wgt_gm);
+              $("#diamond_qty").val(result.item[0].diamond_qty);
+              $current_rate = Number($("#current_rate").val());
+              if (result.item[0].status == 'pt') {
+                $price = $current_rate * Number($("#wgt_gm").val());
+              } else {
+                $price = result.item[0].price;
+              }
+              $("#price").val($price.toFixed(2));
+            }
+          })
+        },
+        focus: function(event, item) {
+          $("#item_id").val(item.item.value);
+          event.preventDefault();
+          //- $("#item_name").val(item.item.label);
+        }
+      });
+
+      $("#bank_id").change(function() {
+        $.ajax({
+          url: "/api/bank?filter=id,eq," + $("#bank_id").val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            $("#account").val(result.bank[0].account);
+          }
+        })
+      });
+
+      $("#order_diamond_id").change(function() {
+        $.ajax({
+          url: "/api/order_diamond?filter=id,eq," + $("#order_diamond_id").val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            $("#order_amount").val(result.order_diamond[0].total_amount);
+            $("#order_description").val(result.order_diamond[0].description);
+          }
+        })
+      });
+
+      $("#change_diamond_id").change(function() {
+        $.ajax({
+          url: "/api/change_diamond?filter=id,eq," + $("#change_diamond_id").val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            $("#change_amount").val(result.change_diamond[0].total_amount);
+          }
+        })
+      });
+
+      $("#list").on("click", ".btn-delete", function(ev){
+        payment_array = JSON.parse($("#payment_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        $amount = payment_array[index].amount;
+        total_payment -= Number($amount);
+        $debt_amount_comma = $("#debt_amount").val();
+        $debt_amount = $debt_amount_comma.replace(/,/g, '');
+        const payment_amount = Number(total_payment) + Number($debt_amount);
+        $subtotal_comma = $("#subtotal").val();
+        $subtotal = $subtotal_comma.replace(/,/g, '');
+        if (payment_amount < $subtotal) {
+          $("#check-total-amount").hide();
+          $("#btngeneral").show();
+          $("#submitBtn").hide();
+        }
+        payment_array.splice(index,1);
+        $(this).parents("tr").remove();
+        $("#payment_array").val(JSON.stringify(payment_array));
+      });
+
+      $("#btngeneral").on("click", function(ev) {
+        ev.preventDefault();
+        var target = $(this).attr("href");
+        $("#bank_id").empty();
+        $('#bank_id').Template({
+          "template": "<option value='${=id}'>${=bank_name}</option>",
+          "ajax": {
+            "url": "/api/customerview/getBank",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          }
+        }).on('completed', function() {
+          var selectedVal = $('#bank_id').data('value');
+          if (selectedVal) {
+            $('#bank_id').selectpicker('val', selectedVal);
+          }
+          $('#bank_id').selectpicker('refresh');
+        });
+        $("#account").val("");
+        $("#amount").val("");
+      });
+
+      $("#dialogAccept").on("click", function(ev) {
+        ev.preventDefault();
+        $payment_type = $("#payment_type").val();
+        var selected = $('#bank_id option:selected');
+        selected.each(function (a) {
+            $bank_name = $(this).text();
+            $bank_id = $(this).val();
+        });
+        $account = $("#account").val();
+        $amount = $("#amount").val();
+        total_payment += Number($amount);
+        $amount_comma = commaSeparateNumber($amount);
+        $subtotal = $("#subtotal").val();
+        $subtotal_no_comma = $subtotal.replace(/,/g, '');
+        if ($("#debt_amount").val() != "") {
+          $debt_amount = Number($subtotal_no_comma) - Number(total_payment);
+          $debt_amount_comma = commaSeparateNumber($debt_amount);
+          $("#debt_amount").val($debt_amount_comma);
+        }
+        $debt_amount_comma = $("#debt_amount").val();
+        $debt_amount = $debt_amount_comma.replace(/,/g, '');
+        const payment_amount = Number(total_payment) + Number($debt_amount);
+        if ($subtotal_no_comma == total_payment) {
+          $("#btngeneral").hide();
+        } else if (total_payment > $subtotal_no_comma) {
+          $("#check-total-amount").html("Payment Amount is Over!").addClass('text-danger').show();
+        }
+        if ($subtotal_no_comma == payment_amount) {
+          $("#submitBtn").show();
+        }
+        var payment = {"payment_type": $payment_type, "bank_id": $bank_id, "account": $account, "amount": $amount };
+        payment_array.push(payment);
+        markup = "<tr><td>"+ $payment_type +"</td><td>"+ $bank_name +"</td><td>" + $account + "</td><td>" +$amount_comma+ "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+        tablebody = $("#list #tbody");
+        tablebody.append(markup);
+        $("#payment_array").val(JSON.stringify(payment_array));
+      });
+
+      $("#itemlist").on("click", ".btn-delete", function(ev){
+        item_array = JSON.parse($("#item_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        $price = item_array[index].price;
+        total_amount = Number($("#total_amount").val());
+        total_amount -= Number($price);
+        $("#total_amount").val(total_amount.toFixed(2));
+        calcSubtotal();
+        item_array.splice(index,1);
+        if ($("#subtotal").val() < total_payment) {
+          $("#check-total-amount").html("Payment Amount is Over!").addClass('text-danger').show();
+        }
+        $(this).parents("tr").remove();
+        $("#item_array").val(JSON.stringify(item_array));
+      });
+
+      $("#btnitemgeneral").on("click", function(ev) {
+        ev.preventDefault();
+        var target = $(this).attr("href");
+        $("#item_id").val("");
+        $("#code").val("");
+        $("#item_name").val("");
+        $("#wgt_gm").val("");
+        $("#diamond_qty").val("");
+        $("#price").val("");
+      });
+
+      $("#dialogItemAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        $item_id = $("#item_id").val();
+        $isExit = 0;
+        if (item_array.length > 0) {
+          item_array.forEach((item) => {
+            if (item.item_id ==$item_id) {
+              $isExit = 1;
+            }
+          });
+        }
+        if ($isExit == 0) {
+          $item_name = $("#item_name").val();
+          $image = $("#image").val();
+          $code = $("#code").val();
+          $wgt_gm = $("#wgt_gm").val();
+          $diamond_qty = $("#diamond_qty").val();
+          $price = $("#price").val();
+          total_amount += Number($price);
+          $price_comma = commaSeparateNumber($price);
+          const total_amount_comma = commaSeparateNumber(total_amount);
+          $("#total_amount").val(total_amount_comma);
+          calcSubtotal();
+          $debt_amount = $("#debt_amount").val().replace(/,/g, '');
+          const payment_amount = Number(total_payment) + Number($debt_amount);
+          $subtotal = $("#subtotal").val();
+          $subtotal_no_comma = $subtotal.replace(/,/g, '');
+          if ($subtotal_no_comma > total_payment) {
+            $("#btngeneral").show();
+            $("#check-total-amount").hide();
+          } else if ($subtotal_no_comma < total_payment) {
+            $("#check-total-amount").html("Payment Amount is Over!").addClass('text-danger').show();
+          } else {
+            $("#check-total-amount").hide();
+          }
+          if ($subtotal_no_comma > payment_amount) {
+            $("#submitBtn").hide();
+          } else {
+            $("#submitBtn").show();
+          }
+          var item = {"item_id": $item_id,"image": $image, "wgt_gm": $wgt_gm, "diamond_qty": $diamond_qty, "price": $price };
+          item_array.push(item);
+          if (item_array.length == 3) {
+            $("#btnitemgeneral").hide();
+          } 
+          markup = "<tr><td>"+ $code +"</td>";
+          if ($image == "") {
+            markup += "<td></td>";
+          } else {
+            markup += "<td><img src='/file/stream?file="+ $image +"' width='80px' height='80px'></td>";
+          }
+          markup += "<td>"+ $item_name +"</td><td>" + $wgt_gm + "</td><td>" +$diamond_qty+ "</td><td>" +$price_comma+ "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+          tablebody = $("#itemlist #tbody-item");
+          tablebody.append(markup);
+          $("#item_array").val(JSON.stringify(item_array));
+        }
+      });
+
+      $("#orderlist").on("click", ".btn-delete", function(ev){
+        order_array = JSON.parse($("#order_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        $order_amount = order_array[index].order_amount;
+        order_total_amount -= Number($order_amount);
+        $("#order_total_amount").val(order_total_amount.toFixed(2));
+        calcSubtotal();
+        calcProfit();
+        order_array.splice(index,1);
+        $(this).parents("tr").remove();
+        $("#order_array").val(JSON.stringify(order_array));
+      });
+
+      $("#btnordergeneral").on("click", function(ev) {
+        ev.preventDefault();
+        var target = $(this).attr("href");
+        //- $("#order_diamond_id").val("");
+        //- $("#order_voc_no").val("");
+        $("#order_amount").val("");
+        $("#order_description").val("");
+        $customer_id = $("#customer_id").val();
+        $("#order_diamond_id").empty();
+        $('#order_diamond_id').Template({
+          "template": "<option value='${=order_diamond_id}'>${=order_voc_no}</option>",
+          "ajax": {
+            "url": "/api/saleview/getOrderDiamondByCustomer?customer_id=" + $customer_id,
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          }
+        }).on('completed', function() {
+          var selectedVal = $('#order_diamond_id').data('value');
+          if (selectedVal) {
+            $('#order_diamond_id').selectpicker('val', selectedVal);
+          }
+          $('#order_diamond_id').selectpicker('refresh');
+        });
+        //- $.ajax({
+        //-   url: "/api/saleview/getOrderDiamondByCustomer?customer_id=" + $customer_id,
+        //-   headers: {"authorization": "Bearer " + token},
+        //-   success: function(result) {
+        //-     $("#order_voc_no").autocomplete({
+        //-       source: result,
+        //-       minLength: 1,
+        //-       select: function (event, order) {
+        //-         event.preventDefault();
+        //-         var selectedOrder = order.item.value;
+        //-         $("#order_diamond_id").val(order.item.value);
+        //-         $("#order_voc_no").val(order.item.label);
+        //-         $.ajax({
+        //-           "url": "/api/saleview/getAmtByOrderDiamondId?order_diamond_id="+order.item.value,
+        //-           "headers": {"authorization": "Bearer " + token},
+        //-           success: function(result){ 
+        //-             $("#order_amount").val(result.total_amount);
+        //-             $("#order_description").val(result.description);
+        //-             calcSubtotal();
+        //-           }
+        //-         });
+        //-       },
+        //-       focus: function(event, order) {
+        //-         event.preventDefault();
+        //-         $("#order_voc_no").val(order.item.label);
+        //-       }
+        //-     });
+        //-   }
+        //- })
+      });
+
+      $("#dialogOrderAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        var selected = $('#order_diamond_id option:selected');
+        selected.each(function (a) {
+            $order_voc_no = $(this).text();
+            $order_diamond_id = $(this).val();
+        });
+        $isExit = 0;
+        if (order_array.length > 0) {
+          order_array.forEach((order) => {
+            if (order.order_diamond_id ==$order_diamond_id) {
+              $isExit = 1;
+            }
+          });
+        }
+        if ($isExit == 0) {
+          $order_amount = $("#order_amount").val();
+          $order_description = $("#order_description").val();
+          order_total_amount += Number($order_amount);
+          $("#order_total_amount").val(order_total_amount.toFixed(2));
+          calcSubtotal();
+          var order = {"order_diamond_id": $order_diamond_id, "order_amount": $order_amount };
+          order_array.push(order);
+          $order_amount_comma = commaSeparateNumber($order_amount);
+          markup = "<tr><td>"+ $order_voc_no +"</td><td>" + $order_amount_comma + "</td><td>" +$order_description+ "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+          tablebody = $("#orderlist #tbody-order");
+          tablebody.append(markup);
+          $("#order_array").val(JSON.stringify(order_array));
+        }
+      });
+
+      $("#changelist").on("click", ".btn-delete", function(ev){
+        change_array = JSON.parse($("#change_array").val());
+        var idx = $(this).closest('tr').first();
+        var index = idx[0].sectionRowIndex;
+        $change_amount = change_array[index].change_amount;
+        change_total_amount -= Number($change_amount);
+        $("#change_total_amount").val(change_total_amount.toFixed(2));
+        calcSubtotal();
+        calcProfit();
+        change_array.splice(index,1);
+        $(this).parents("tr").remove();
+        $("#change_array").val(JSON.stringify(change_array));
+      });
+
+      $("#btnchangegeneral").on("click", function(ev) {
+        ev.preventDefault();
+        var target = $(this).attr("href");
+        //- $("#change_diamond_id").val("");
+        //- $("#change_voc_no").val("");
+        $("#change_amount").val("");
+        //- $("#change_description").val("");
+        $("#change_diamond_id").empty();
+        $('#change_diamond_id').Template({
+          "template": "<option value='${=change_diamond_id}'>${=change_voc_no}</option>",
+          "ajax": {
+            "url": "/api/saleview/getChangeByCustomer?customer_id=" + $customer_id,
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          }
+        }).on('completed', function() {
+          var selectedVal = $('#change_diamond_id').data('value');
+          if (selectedVal) {
+            $('#change_diamond_id').selectpicker('val', selectedVal);
+          }
+          $('#change_diamond_id').selectpicker('refresh');
+        });
+      });
+
+      $("#dialogChangeAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        var selected = $('#change_diamond_id option:selected');
+        selected.each(function (a) {
+            $change_voc_no = $(this).text();
+            $change_diamond_id = $(this).val();
+        })
+        $isExit = 0;
+        if (change_array.length > 0) {
+          change_array.forEach((change) => {
+            if (change.change_diamond_id ==$change_diamond_id) {
+              $isExit = 1;
+            }
+          });
+        }
+        if ($isExit == 0) {
+          $change_amount = $("#change_amount").val();
+          change_total_amount += Number($change_amount);
+          $("#change_total_amount").val(change_total_amount.toFixed(2));
+          calcSubtotal();
+          var change = {"change_diamond_id": $change_diamond_id, "change_amount": $change_amount };
+          change_array.push(change);
+          $change_amount_comma = commaSeparateNumber($change_amount);
+          markup = "<tr><td>"+ $change_voc_no +"</td><td>" + $change_amount_comma + "</td><td><button class='btn btn-danger btn-xs btn-delete' >Delete</button></td></tr>";
+          tablebody = $("#changelist #tbody-change");
+          tablebody.append(markup);
+          $("#change_array").val(JSON.stringify(change_array));
+        }
+      });
+
+      $("#submitBtn").click(function() {
+        $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+    });

@@ -1,0 +1,701 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a.mm(href="/polish-finish") အထည် အသေးစိတ် အချက်အလက်
+    li.breadcrumb-item.active
+      span.mm စာရင်းသွင်း
+  h1.page-header.mm အထည် အသေးစိတ် အချက်အလက်
+
+  div.modal.fade.model-diamond#dialogAddOffice(tabindex='-1', role='dialog', aria-labelledby='AddOffice')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title Office %
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-2.control-label(for='office_per') Office %
+            div.col-sm-10
+              input.form-control.model-stock-code#office_per(class='container text-right', type='decimalnumber', min="0", name='office_per',value=params.office_per, maxlength="55")
+
+        div.modal-footer
+          button.btn.btn-primary#dialogOfficeAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogOfficeCancel(type='button', data-dismiss='modal') Cancel
+
+  div.modal.fade.model-diamond#dialogAddGoldsmith(tabindex='-1', role='dialog', aria-labelledby='AddGoldsmith')
+    div.modal-dialog.modal-sm(role='document', style='max-width:730px')
+      div.modal-content
+        div.modal-header
+          h4.modal-title Goldsmith %
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        div.modal-body
+          div.form-group.row
+            label.col-sm-3.control-label(for='goldsmith_per') ပန်းထိမ်ဆရာ %
+            div.col-sm-9
+              input.form-control.model-stock-code#goldsmith_per(class='container text-right', type='decimalnumber', min="0", name='goldsmith_per',value=params.goldsmith_per, maxlength="55")
+
+          //- div.form-group.row
+          //-   label.col-sm-2.control-label(for='workding_days') လုပ်ရက်
+          //-   div.col-sm-10
+          //-     input.form-control.model-stock-code#workding_days(class='container text-right', type='decimalnumber', min="0", name='workding_days', value=params.workding_days, maxlength="55", required)
+
+          //- div.form-group.row
+          //-   label.col-sm-2.control-label(for='goldsmith_cost') လက်ခ
+          //-   div.col-sm-10
+          //-     input.form-control.model-stock-code#goldsmith_cost(class='container text-right', type='decimalnumber', min="0", name='goldsmith_cost', value=params.goldsmith_cost, maxlength="55", required)
+
+        div.modal-footer
+          button.btn.btn-primary#dialogGoldsmithAccept(type='button', data-dismiss='modal') Ok
+          button.btn.btn-secondary#dialogGoldsmithCancel(type='button', data-dismiss='modal') Cancel
+
+
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.polish.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+      input#count(type='hidden', name='count', value=params.count)
+      input#reduce_wgt_gm(type='hidden', name='reduce_wgt_gm', value=item_reduce_wgt.wgt_gm)
+      input#reduce_wgt_k(type='hidden', name='reduce_wgt_k', value=item_reduce_wgt.wgt_k)
+      input#reduce_wgt_p(type='hidden', name='reduce_wgt_p', value=item_reduce_wgt.wgt_p)
+      input#reduce_wgt_y(type='hidden', name='reduce_wgt_y', value=item_reduce_wgt.wgt_y)
+
+      div.form-group.row#tblgen()
+        div.table-responsive.col-md-12
+          table#list.table.table-bordered
+            thead
+                tr
+                th.mm စဉ်
+                th.mm အကြောင်းအရာ
+                th.mm နေ့စွဲ
+                th.mm ဓာတ်ပုံ
+                th.mm အထည် Code
+                th.mm အလေးချိန်
+                th.mm ပန်းထိမ်အမည်
+                th.mm အလျော့
+                th.mm လက်ခ
+            tbody#tbody
+                tr
+                    td 
+                        span 1
+                    td
+                        span.mm အရောင်တင်
+                    td
+                        input(value=params.polish.date, style='border:0; background:transparent;', readonly)
+                    td
+                        img(src=`/file/stream?file=${params.polish.image}`, alt="", height="50px", weight="50px")
+                    td 
+                        input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=params.polish.wgt_gm, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=params.polish.name, style='border:0; background:transparent;', readonly)
+                    td
+                        //- input(value=params.polish.reduce_wgt_gm, style='border:0; background:transparent;', readonly)
+                    td
+                if params.get_outside
+                    tr
+                        td 
+                            span 2
+                        td
+                            span.mm အပြင်ပန်းထိမ်အပ်
+                        td
+                            input(value=params.get_outside.date, style='border:0; background:transparent;', readonly)
+                        td
+                            img(src=`/file/stream?file=${params.get_outside.image}`, alt="", height="50px", weight="50px")
+                        td 
+                            input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_outside.return_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_outside.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_outside.gm_amt, style='border:0; background:transparent;', readonly)
+                        td
+                if params.give_outside_item
+                    tr
+                        td 
+                            span 3
+                        td
+                            span.mm အပြင်ပန်းထိမ်ပေး
+                        td
+                            input(value=params.give_outside_item.date, style='border:0; background:transparent;', readonly)
+                        td
+                            //- img(src=`/file/stream?file=${params.give_outside_item.image}`, alt="", height="50px", weight="50px")
+                        td 
+                            input(value=params.give_outside_item.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.give_outside_item.gold_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.give_outside_item.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.give_outside_item.gm_amt, style='border:0; background:transparent;', readonly)
+                        td
+                if params.get_diamond
+                    tr
+                        td 
+                            span 2
+                        td
+                            span.mm စိန်တပ်
+                        td
+                            input(value=params.get_diamond.date, style='border:0; background:transparent;', readonly)
+                        td
+                            img(src=`/file/stream?file=${params.get_diamond.image}`, alt="", height="50px", weight="50px")
+                        td
+                            input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_diamond.return_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_diamond.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_diamond.gm_amt, style='border:0; background:transparent;', readonly)
+                        td
+                if params.give_diamond
+                    tr
+                        td 
+                            span 3
+                        td
+                            span.mm စိန်ပေး
+                        td
+                            input(value=params.give_diamond.date, style='border:0; background:transparent;', readonly)
+                        td
+                            //- img(src=params.give_diamond.image, height='30px', weight='100px', title='', alt='')
+                            //- <img src="' + row.image + '" height="30px" weight="100px" title="" alt="" />
+                        td
+                            input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.give_diamond.return_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.give_diamond.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.give_diamond.get_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                if params.first_polish
+                    tr
+                        td 
+                            span 4
+                        td
+                            span.mm First Polish
+                        td
+                            input(value=params.first_polish.date, style='border:0; background:transparent;', readonly)
+                        td
+                            //- img(src=params.first_polish.image, height='30px', weight='100px', title='', alt='')
+                            //- <img src="' + row.image + '" height="30px" weight="100px" title="" alt="" />
+                        td
+                            input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.first_polish.wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.first_polish.polisher_name, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.first_polish.reduce_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                if params.get_goldsmith
+                    tr
+                        td
+                            span 5
+                        td
+                            span.mm ပန်းထိမ်အပ်
+                        td
+                            input(value=params.get_goldsmith.date, style='border:0; background:transparent;', readonly)
+                        td
+                            //- img(src=params.get_goldsmith.image, height='30px', weight='100px', title='', alt='')
+                            //- <img src="' + row.image + '" height="30px" weight="100px" title="" alt="" />
+                        td
+                            input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_goldsmith.wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_goldsmith.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.get_goldsmith.gm_amt, style='border:0; background:transparent;', readonly)
+                        td
+                if params.give_goldsmith
+                    tr
+                        td 
+                            span 6
+                        td
+                            span.mm ပန်းထိမ်ပေး
+                        td
+                            input(value=params.give_goldsmith.date, style='border:0; background:transparent;', readonly)
+                        td
+                            //- img(src=params.give_goldsmith.image, height='30px', weight='100px', title='', alt='')
+                            //- <img src="' + row.image + '" height="30px" weight="100px" title="" alt="" />
+                        td
+                            input(value=params.polish.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.give_goldsmith.total_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.give_goldsmith.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.give_goldsmith.get_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                if params.mould
+                    tr
+                        td 
+                            span 7
+                        td
+                            span.mm မိုလောင်း
+                        td
+                            input(value=params.mould.date, style='border:0; background:transparent;', readonly)
+                        td
+                            //- img(src=params.mould.image, height='30px', weight='100px', title='', alt='')
+                            //- <img src="' + row.image + '" height="30px" weight="100px" title="" alt="" />
+                        td
+                            input(value=params.mould.code, style='border:0; background:transparent;', readonly)
+                        td
+                            input(value=params.mould.wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.mould.goldsmith_name, style='border:0; background:transparent;', readonly)
+                        td
+                            //- input(value=params.mould.reduce_wgt_gm, style='border:0; background:transparent;', readonly)
+                        td
+                if params.get_outside
+                    tr
+                        td(colspan="7")
+                            span.mm လက်ခ
+                        td
+                        td.text-right
+                            input(value=params.get_outside.cost, style='border:0; background:transparent; text-align: right;', readonly)
+                if wax_cost
+                    tr
+                        td(colspan="7")
+                            span.mm ဖယောင်းခ
+                        td
+                        td.text-right
+                            input(value=wax_cost, style='border:0; background:transparent; text-align: right;', readonly)
+                if mould_cost
+                    tr
+                        td(colspan="7")
+                            span.mm မိုလောင်းခ
+                        td
+                        td.text-right
+                            input(value=mould_cost, style='border:0; background:transparent; text-align: right;', readonly)
+                if params.get_diamond
+                    tr
+                        td(colspan="7")
+                            span.mm စိန်တပ်ခ
+                        td
+                        td
+                            input.digit(value=set_diamond_cost, style='border:0; background:transparent; text-align: right;', readonly)
+                tr
+                    td(colspan="7")
+                    td
+                        input(value=item_reduce_wgt.wgt_gm, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=total_cost, style='border:0; background:transparent; text-align: right;', readonly)
+
+      if diamonds_arr
+        h3.mm စိန်ဈေး
+        div.form-group.row#tblgen()
+            div.table-responsive.col-md-12
+            table#list.table.table-bordered
+                thead
+                    tr
+                    th.mm စဉ်
+                    th.mm စိန်ထုပ် code
+                    th.mm စိန်လုံးစီး code
+                    th Caret Price
+                    th.mm Dollar
+                    th.mm အလေးချိန်
+                    th.mm အပွင့်ရေ
+                    th.mm သင့်ငွေ
+                tbody#tbody
+                    input#diamonds_arr(type='hidden', name='diamonds_arr', value=diamonds_arr)
+                    //- span=diamonds_arr
+                    each item, index in diamonds_arr
+                        tr
+                            td
+                                span=index + 1
+                            td
+                                span=item.wholediamond_code
+                            td
+                                span=item.diamond_code
+                            td
+                                span=item.usd_per_carat
+                            td
+                                span=item.current_usd
+                            td 
+                                span=item.wgt_ct
+                            td
+                                span=item.qty
+                            td
+                                span=item.diamond_cost
+
+      h3.mm ရွှေ + စိန် + လက်ခ အချုပ်
+      div.form-group.row#tblgen()
+        div.table-responsive.col-md-12
+          table#list.table.table-bordered
+            thead
+                tr
+                th.mm စဉ်
+                th.mm အကြောင်းအရာ
+                th.actions-2.mm အလေးချိန်
+                //- th.mm ကျပ်ပဲရွေးချိန်
+                th.actions-2.mm ကျပ်
+                th.actions-2.mm ပဲ
+                th.actions-2.mm ရွေး
+                th.actions-2.mm ရွှေဈေး
+                th.actions-2.mm သင့်ငွေ
+                th Edit
+            tbody#tbody
+                tr
+                    td 
+                        span 1
+                    td
+                        span.mm ရွှေအတင်
+                    td
+                        input(value=item_net_wgt.wgt_gm, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_net_wgt.wgt_k, style='border:0; background:transparent;', readonly)
+                        //- input(value=item_net_wgt.wgt_kpy, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_net_wgt.wgt_p, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_net_wgt.wgt_y, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_net_wgt.goldrate_price, style='border:0; background:transparent;', readonly)
+                    td 
+                        //- input#office_percent(name='office_percent', value=params.office_percent, style='border:0; background:transparent;', readonly)
+                        input#total_amount(name='total_amount', value=item_net_wgt.price, style='border:0; background:transparent;', readonly)
+                    td
+                tr
+                    td 
+                        span 2
+                    td
+                        span.mm ရွှေအလျော့
+                    td
+                        input(value=item_reduce_wgt.wgt_gm, style='border:0; background:transparent;', readonly)
+                    td
+                        //- input(value=item_reduce_wgt.wgt_kpy, style='border:0; background:transparent;', readonly)
+                        input(value=item_reduce_wgt.wgt_k, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_reduce_wgt.wgt_p, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_reduce_wgt.wgt_y, style='border:0; background:transparent;', readonly)
+                    td
+                        input(value=item_reduce_wgt.goldrate_price, style='border:0; background:transparent;', readonly)
+                    td 
+                        input#total_reduce_amount(value=item_reduce_wgt.price, style='border:0; background:transparent;', readonly)
+                    td
+                tr
+                    td 
+                        span 3
+                    td(colspan="6")
+                        span.mm လက်ခ + ဖယောင်း + မိုခ + စိန်တပ်ခ
+                    td
+                        input#total_cost(value=total_cost, style='border:0; background:transparent;', readonly)
+                    td
+                tr
+                    td 
+                        span 4
+                    td(colspan="6")
+                        span.mm Office %
+                    td
+                        input#office_percent(name='office_percent', value=params.office_percent, style='border:0; background:transparent;', readonly)
+                    td
+                        a.btn.btn-info.list-action-text#btnOffice(href="#", role="button", title="Office%", data-toggle="modal", data-target="#dialogAddOffice")
+                            span Edit
+                tr
+                    td 
+                        span 5
+                    td(colspan="6")
+                        span.mm Goldsmith %
+                    td
+                        input#goldsmith_cost(name='goldsmith_cost', value=params.goldsmith_cost, style='border:0; background:transparent;', readonly)
+                        input#goldsmith_percent(type='hidden', value=params.goldsmith_percent, name='goldsmith_percent')
+                    td
+                        a.btn.btn-info.list-action-text#btnGoldsmith(href="#", role="button", title="Goldsmith%", data-toggle="modal", data-target="#dialogAddGoldsmith")
+                            span Edit
+                tr
+                    td(colspan="7")
+                        span Total
+                    td
+                        input#total_price(name='total_price', value=params.total_price, style='border:0; background:transparent;', readonly)
+                        //- input(value=params.get_diamond.wax_cost, style='border:0; background:transparent;', readonly)
+                    td
+
+      br                               
+      div.form-group.row
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='date') စာရင်းသွင်းနေ့စွဲ
+          div.col-sm-8
+            input.form-control.fromdate#date.mm(type='text', name='date', value=params.date, required)
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='branch_id') Branch
+          div.col-sm-8
+            select#branch_id.selectpicker.form-control(name='branch_id', value=params.branch_id, data-value=params.branch_id, data-live-search="false", data-size="20")
+              option(value="") [Select one]
+
+      div.form-group.row
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='category_id') အမျိုးအစား
+          div.col-sm-8
+            select#category_id.selectpicker.form-control(name='category_id', value=params.category_id, data-value=params.category_id, data-live-search="false", data-size="20")
+              option(value="") [Select one]
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='type_id') Type
+          div.col-sm-8
+            select#type_id.selectpicker.form-control(name='type_id', value=params.type_id, data-value=params.type_id, data-live-search="false", data-size="20")
+              option(value="") [Select one]
+
+      div.form-group.row
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='code') Code
+          div.col-sm-8
+            input.form-control.model-stock-code#code(type='text', name='code', value=params.code, maxlength="55", readonly)
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='grade_id') Grade
+          div.col-sm-8
+            select#grade_id.selectpicker.form-control(name='grade_id', value=params.grade_id, data-value=params.grade_id, data-live-search="false", data-size="20")
+              option(value="") [Select one]
+        
+        
+      if diamonds_arr
+        div.form-group.row
+          div.col-sm-6.row
+            label.col-sm-4.control-label(for='percent') %
+            div.col-sm-8
+              input.form-control.model-stock-code#percent(class='container text-right', type='decimalnumber', min="0", name='percent', value=params.percent, maxlength="55")
+      else
+        div.form-group.row
+          div.col-sm-4.row
+            label.col-sm-2.control-label(for='wgt_k') ကျပ်
+            div.col-sm-8
+              input.form-control.model-stock-wgt_gm#wgt_k(type='decimal', name='wgt_k',value=params.wgt_k, maxlength="55")
+          div.col-sm-4.row
+            label.col-sm-2.control-label(for='wgt_p') ပဲ
+            div.col-sm-8
+              input.form-control.model-stock-wgt_gm#wgt_p(type='decimal', name='wgt_p',value=params.wgt_p, maxlength="55")
+          div.col-sm-4.row
+            label.col-sm-2.control-label(for='wgt_y') ရွေး
+            div.col-sm-8
+              input.form-control.model-stock-wgt_gm#wgt_y(type='decimal', name='wgt_y',value=params.wgt_y, maxlength="55")
+
+      div.form-group.row
+        div.col-sm-6.row
+          label.col-sm-4.control-label(for='price') ရောင်းဈေး
+          div.col-sm-8
+            input.form-control.model-stock-code#price(class='container text-right', type='number', min="0", name='price', value=params.price, maxlength="55")
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var datecode = "!{datecode}";
+      var item_array = [];
+      var codes = [];
+      var total_wgt_gm = 0;
+      var category = "";
+      var branch = "";
+      var type = "";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-polish-finish').addClass('active');
+      $('div#production_subitems').addClass('show');
+      $("#check-reduce").hide();
+
+      var _tmp = $("#recordid").val();
+      $(window).keypress(function(event) {
+        if (!(event.which == 13 && event.key == "Enter") && !(event.which == 13)) return true;
+        $("#container form input[name=cancel]").click();
+        event.preventDefault();
+        return false;
+      });
+
+      $('#branch_id').Template({
+        "template": "<option value='${=id}'>${=branch_name}</option>",
+        "ajax": {
+          "url": "/api/branch",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "branch"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#branch_id').data('value');
+        if (selectedVal) {
+          $('#branch_id').selectpicker('val', selectedVal);
+        }
+        $('#branch_id').selectpicker('refresh');
+      });
+
+      $('#category_id').Template({
+        "template": "<option value='${=id}'>${=category_name}</option>",
+        "ajax": {
+          "url": "/api/category",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "category"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#category_id').data('value');
+        if (selectedVal) {
+          $('#category_id').selectpicker('val', selectedVal);
+        }
+        $('#category_id').selectpicker('refresh');
+      });
+
+      $('#grade_id').Template({
+        "template": "<option value='${=id}'>${=grade_name}</option>",
+        "ajax": {
+          "url": "/api/grade",
+          "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "grade"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#grade_id').data('value');
+        if (selectedVal) {
+          $('#grade_id').selectpicker('val', selectedVal);
+        }
+        $('#grade_id').selectpicker('refresh');
+      });
+
+      $('#type_id').Template({
+        "template": "<option value='${=id}'>${=name}</option>",
+        "ajax": {
+        "url": "/api/type",
+        "headers": {"authorization": "Bearer " + token},
+          "dataSrc": "type"
+        }
+      }).on('completed', function() {
+        var selectedVal = $('#type_id').data('value');
+        if (selectedVal) {
+          $('#type_id').selectpicker('val', selectedVal);
+        }
+        $('#type_id').selectpicker('refresh');
+      });
+
+      $("#category_id").change(function() {
+        $.ajax({
+          url: "/api/category?filter=id,eq," +  $('#category_id option:selected').val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            category = result.category[0].category_code;
+            createCode();
+          }
+        })
+      });
+
+      $("#branch_id").change(function() {
+        $.ajax({
+          url: "/api/branch?filter=id,eq," +  $('#branch_id option:selected').val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            branch = result.branch[0].branch_code;
+            createCode();
+          }
+        })
+      });
+
+      $("#type_id").change(function() {
+        $.ajax({
+          url: "/api/type?filter=id,eq," +  $('#type_id option:selected').val(),
+          headers: {"authorization": "Bearer " + token},
+          success: function(result) {
+            type = result.type[0].code;
+            createCode();
+          }
+        });
+      });
+
+      function createCode() {
+        if (type != "" && category != "" && branch != "") {
+          code = branch + type + category;
+          $.ajax({
+            url: "/api/itemview/getCodeCount?code=" +  code,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result) {
+              if (result && result != "") {
+                const data = result.code.split(code);
+                count = Number(data[1]) + 1;
+              } else {
+                count = 1;
+              }
+              code = code + count;
+              $("#count").val(count);
+              $("#code").val(code);
+            }
+          })
+        }
+      }
+
+      function commaSeparateNumber(val){
+        while (/(\d+)(\d{3})/.test(val.toString())){
+          val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+        }
+        console.log("with digit", val);
+        return val;
+      }
+
+      $("#dialogOfficeAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        $office_per = $("#office_per").val();
+        $("#office_percent").val(commaSeparateNumber($office_per));
+      });
+
+      $("#dialogGoldsmithAccept").on("click", function(ev) {
+        ev.preventDefault();
+
+        $total_amount = $("#total_amount").val();
+        $total_amount_no_comma = $total_amount.replace(/,/g, '');
+        $total_reduce_amount = $("#total_reduce_amount").val();
+        $total_reduce_amount_no_comma = $total_reduce_amount.replace(/,/g, '');
+        $total_cost = $("#total_cost").val();
+        $total_cost_no_comma = $total_cost.replace(/,/g, '');
+        $total_cost_num = Number($total_cost_no_comma);
+        $office_per = $("#office_percent").val();
+        $office_per_no_comma = $office_per.replace(/,/g, '');
+        $office_per_num = Number($office_per_no_comma)
+        $goldsmith_per = Number($("#goldsmith_per").val());
+        $("#goldsmith_percent").val($goldsmith_per);
+        $total = $total_cost_num + $office_per_num;
+        $goldsmith_cost = $total * ($goldsmith_per / 100);
+        $total_price = Number($total) + Number($goldsmith_cost) + Number($total_amount_no_comma) + Number($total_reduce_amount_no_comma);
+        $total_price = commaSeparateNumber($total_price.toFixed(2));
+        $goldsmith_cost = commaSeparateNumber($goldsmith_cost);
+        $("#goldsmith_cost").val($goldsmith_cost);
+        $("#total_price").val($total_price);
+      });
+
+      $("#alert").hide();
+      $('#entryForm').ajaxForm({
+        success: function(data) {
+          if (data.success) {
+            $("#alertTitle").html("Success");
+            $("#alertMessage").html("Save Success!");
+            $("#alert").addClass("alert-success").show();
+
+            var postFrm = $('#postSuccessForm');
+            var params = $.url(postFrm.attr('action')).param();
+            if (!params) {
+              for(var key in params) {
+                postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+              }
+            }
+            window.setTimeout(function(){
+              postFrm.submit();
+            }, 2 * 1000);
+
+          } else {
+            $("#alertTitle").html("Error");
+            $("#alertMessage").html("Error on save!");
+            $("#alert").addClass("alert-danger").show();
+          }
+        }
+      });
+    });

@@ -1,0 +1,173 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm Sale Report
+  h1.page-header.mm Sale Report
+
+  form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+    div.form-group.row
+        label.col-sm-2.control-label(for='startdate') From Date
+        div.col-sm-10
+          input.form-control.fromdate#start.mm(type='text', name='start', required)
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='enddate') To Date
+      div.col-sm-10
+        input.form-control.todate#end.mm(type='text', name='end', required)
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='type') Type
+      div.col-sm-10
+        select#type.selectpicker.form-control(name='type', data-live-search="false", data-size="20", required)
+          option(value="") [Select one]
+          option(value="all") All
+          option(value="diamond") Diamond
+          option(value="gold") Gold
+
+    div.form-group.row
+      label.col-sm-2.control-label(for='delivery_type') Delivery Type
+      div.col-sm-10
+        select#delivery_type.selectpicker.form-control(name='delivery_type', data-live-search="false", data-size="20", required)
+          option(value="") [Select one]
+          option(value="all") All
+          option(value="pickup") Pickup
+          option(value="delivery") Delivery
+        
+    div.row.justify-content-center.form-actions
+      button.btn.btn-primary#loadBtn(type='button', role='button') Load
+
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th Date
+          th Voucher No
+          th Cash Amount
+          th Bank Amount
+          th Debt Amount
+          th Description
+      tbody
+      tfoot
+        tr
+          th
+          th
+          th
+          th
+          th
+          th
+          th
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-sale-report').addClass('active');
+      $('div#report_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+
+      let current = new Date();
+      let month = current.getMonth() + 1;
+      const year = current.getFullYear();
+      let day = current.getDate();
+      if (month < 10)
+        month = "0" + month;
+      if (day < 10)
+        day = "0" + day;
+
+      const showcurrent = day + "/" + month + "/" + year;
+      const showstart = "01/" + month + "/" + year;
+      $("#start").val(showstart);
+      $("#end").val(showcurrent);
+      const type = $("#type").val();
+      const delivery_type = $("#delivery_type").val();
+      reload(showstart, showcurrent, type, delivery_type);
+
+      $("#loadBtn").on('click', function(event){
+        reload($("#start").val(), $("#end").val(), $("#type").val(), $("#delivery_type").val());
+      });
+
+      function reload(start, end, type, delivery_type) {
+        console.log("type ", type);
+        console.log("delivery_type ", delivery_type);
+        var table = $('table#list').DataTable({
+          destroy: true,
+          autoWidth: true,
+          ajax: { 
+            "url": "/api/reportview/getSaleReport?start="+start+"&end="+end+"&type="+type+"&delivery_type="+delivery_type,
+            "type": "GET",
+            "headers": {"authorization": "Bearer " + token}
+          },
+          columns: [
+            { "data": "id" },
+            { "data": "date" },
+            { "data": "voc_no" },
+            { "data": "cash_amount", className: "total" },
+            { "data": "bank_amount", className: "total" },
+            { "data": "debt_amount", className: "total" },
+            { "data": "description" }
+          ],
+          columnDefs: [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 3, render: dataTableCashAmountWithCommas() },
+            { targets: 4, render: dataTableBankAmountWithCommas() },
+            { targets: 5, render: dataTableDebtAmountWithCommas() },
+          ],
+          lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+          dom:  "<'row'<'col-sm-12 col-md-12 mb-1'B>>" +
+                "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+          "footerCallback": function(row, data, start, end, display) {
+            console.log("row ", row);
+            console.log("data ", data);
+            console.log("start ", start);
+            console.log("end ", end);
+            console.log("display ", display);
+            var api = this.api();
+            api.columns('.total', { page: 'all' }).every(function() {
+              var allAmount = this.data()
+                                  .reduce(function(a, b) {
+                                    var x = parseFloat(a) || 0;
+                                    var y = parseFloat(b) || 0;
+                                    return x + y;
+                                  }, 0);
+              var allAmount_comma = commaSeparateNumber(allAmount);
+              console.log("All Amount ", allAmount_comma);
+              $(this.footer()).html(allAmount_comma);
+            })
+          },
+          buttons: [
+            {
+              extend: 'excel',
+              text: 'Excel',
+              charset: 'utf-8',
+              className: 'success-excel',
+              filename: 'Sale Report',
+              exportOptions: {
+                columns: [ 0, 1, 2, 3, 4, 5, 6 ]
+              },
+              title: 'Sale Report',
+            }
+          ]
+        });
+
+        return table;
+      }
+
+      function commaSeparateNumber(val){
+        while (/(\d+)(\d{3})/.test(val.toString())){
+          val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+        }
+        console.log("with digit", val);
+        return val;
+      }
+    });

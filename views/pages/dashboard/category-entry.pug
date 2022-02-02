@@ -1,0 +1,155 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item
+      a(href="/category") Category
+    li.breadcrumb-item.active
+      span Entry
+  h1.page-header Category Entry
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      input#recordid(type='hidden', name='id', value=params.id)
+      input#createddate(type='hidden', name='createddate', value=params.createddate)
+      input#updateddate(type='hidden', name='updateddate', value=params.updateddate)
+
+      div.text-right#prefix-name
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='category_code') Prefix
+        div.col-sm-3.label-data
+          input.form-control#category_code(type='text', name='category_code', value=params.category_code, maxlength="2", required autofocus)
+          
+      div.form-group.row
+        div.col-sm-2.label-data
+          label.control-label(for='category_name') Category
+        div.col-sm-3.label-data
+          input.form-control#category_name.mm(type='text', name='category_name', value=params.category_name, maxlength="55", required autofocus)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for="") ဓာတ်ပုံ
+        div.col-sm-3
+          div.form-image#imgContainer
+            div.image-add-continer
+              button.btn.btn-light.image-add#btnImgAdd(type="button")
+                span.fa.fa-plus(aria-hidden= true)
+            div.image-preview-container
+              input#image(type="hidden", name="image", value=params.image)
+              img.form-image-preview.image-preview
+              div.image-delete-container
+                a.image-delete(title='Remove')
+                  i.fa.fa-trash
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+    form#postSuccessForm(method='GET', action=listUrl)
+  script(src='/js/upload.js')
+  script(src='/js/scripts-upload.js')
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var submit = 0;
+      $('div.sidebar-sticky li.nav-category').removeClass('active');
+      $('li#menu-category').addClass('active');
+      $('div#setup_subitems').addClass('show');
+
+      $("#alert").hide();
+
+      $("#prefix-name").hide();
+      $("#category_code").on('change keyup',function(){
+        $("#category_code").val(($("#category_code").val()).toUpperCase());
+
+        var recordid = $("#recordid").val();
+        var prefix = $("#category_code").val();
+        if (submit == 0) {
+          $.ajax({
+            url: "/api/checkduplicate/checkCategoryPrefix?prefix=" + prefix + "&recordid=" + recordid,  
+            headers: {"authorization": "Bearer " + token},
+            success: function(result){
+              if (result == true) {
+                $("#prefix-name").html("Already Exist!").addClass('text-danger').show();
+                submitBtn.setAttribute("disabled", "");
+              } else {
+                $("#prefix-name").hide();
+                submitBtn.removeAttribute("disabled");
+              }
+            }
+          });
+        }
+      });
+
+      imageUpload('#imgContainer', '#image', 'item');
+      $("#submitBtn").click(function() {
+        submit = 1;
+        //- $("#submitBtn").setAttribute("disabled", "");
+      });
+
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+      //- $('#entryForm').ajaxForm({
+      //-   success: function(data) {
+      //-     if (data.success) {
+      //-       $("#alertTitle").html("Success");
+      //-       $("#alertMessage").html("Save Success!");
+      //-       $("#alert").addClass("alert-success").show();
+
+      //-       var postFrm = $('#postSuccessForm');
+      //-       var params = $.url(postFrm.attr('action')).param();
+      //-       if (!params) {
+      //-         for(var key in params) {
+      //-           postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+      //-         }
+      //-       }
+      //-       window.setTimeout(function(){
+      //-         postFrm.submit();
+      //-       }, 2 * 1000);
+
+      //-     } else {
+      //-       $("#alertTitle").html("Error");
+      //-       $("#alertMessage").html("Error on save!");
+      //-       $("#alert").addClass("alert-danger").show();
+      //-     }
+      //-   }
+      //- });
+    });

@@ -1,0 +1,60 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span Stock
+  h1.page-header Stock
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရွှေလက်ကျန်
+          th.mm ကြေးလက်ကျန်
+          th.mm ဘော်လက်ကျန်
+          th.mm မိုလက်ကျန်
+          th.mm ၁၆ပဲရည်
+          th.mm ၁၅ပဲရည်
+          th.mm ၁၄ပဲရည်
+          th.mm ၁၃ပဲရည်
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-stock-report').addClass('active');
+      $('div#report_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/stock",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "stock"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "gold_total_gm" },
+              { "data": "brass_total_gm" },
+              { "data": "silver_total_gm" },
+              { "data": "mo_total_gm" },
+              { "data": "py_16" },
+              { "data": "py_15" },
+              { "data": "py_14" },
+              { "data": "py_13" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+          ]
+      });
+
+    });

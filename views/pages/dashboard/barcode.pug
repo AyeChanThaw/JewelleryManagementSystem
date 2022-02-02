@@ -1,0 +1,262 @@
+extends ../../includes/layout-dashboard
+
+block content
+    ol.breadcrumb
+        li.breadcrumb-item
+            a(href="/dashboard") Home
+        li.breadcrumb-item
+            a(href="/polish-finish") အထည်ချရန်စာရင်း
+    body#barcode-body
+        div.print-format
+            table.barcode-table
+                thead
+                tbody#barcode-selector
+                    input#id(type='hidden', name='params', value=params.id)
+                    input#code(type='hidden', name='params', value=params.code)
+                    input#wgt_gm(type='hidden', name='params', value=params.wgt_gm)
+                    input#wgt_k(type='hidden', name='params', value=params.wgt_k)
+                    input#wgt_p(type='hidden', name='params', value=params.wgt_p)
+                    input#wgt_y(type='hidden', name='params', value=params.wgt_y)
+                    input#type(type='hidden', name='params', value=params.type)
+                    tr
+                        td.pl-5
+                            strong=params.wgt_gm + 'G'
+                        td#papa
+                            svg.barcode
+                    tr
+                        td.pl-5
+                            strong=params.diamond_qty + 'DC'
+                        td
+                            strong=params.price + 'MMK'
+            div#hidden-barcode
+            //- input.canvas(type="button", value="CANVAS")
+            input.printBarcode(type="button", value="PRINT")
+
+        //- h1=title
+        //- div#printable
+        //-     svg#bcode.barcode
+        //- input.printBarcode(type="button", value="PRINT")
+                            
+    
+    //- script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js")
+    script.
+        $(document).ready(function(){
+            //- const { createCanvas } = require("canvas");
+            var access = ("#{permission.access}").split(",");
+            if (access[1] != "1") $("#actionReply").hide();
+            var wgt_gm = "!{params.wgt_gm}";
+            var wgt_k = "!{params.wgt_k}";
+            var wgt_p = "!{params.wgt_p}";
+            var wgt_y = "!{params.wgt_y}";
+            var dc = "!{params.diamond_qty}";
+            var price = "!{params.price}";
+            var code = "!{params.code}";
+            var type = "!{params.type}";
+            console.log("wgt_y ", wgt_y);
+
+            //- Can Scan Barcode
+            //- JsBarcode(".barcode", code, {
+            //-     width: 1.3,
+            //-     height: 18,
+            //-     textAlign: "center",
+            //-     fontOptions: "bold",
+            //-     padding: 0,
+            //-     margin: 0,
+            //-     fontSize: 11
+            //- });
+            if (type == "diamond") {
+                JsBarcode(".barcode", code, {
+                    width: 1.3,
+                    height: 18,
+                    textAlign: "center",
+                    fontOptions: "bold",
+                    padding: 0,
+                    margin: 0,
+                    fontSize: 11
+                });
+            } else if (type == "gold") {
+                JsBarcode(".barcode", code, {
+                    width: 1.1,
+                    height: 18,
+                    textAlign: "center",
+                    fontOptions: "bold",
+                    padding: 0,
+                    margin: 0,
+                    fontSize: 11
+                });
+            } else if (type == "pt") {
+                JsBarcode(".barcode", code, {
+                    width: 1.1,
+                    height: 18,
+                    textAlign: "center",
+                    fontOptions: "bold",
+                    padding: 0,
+                    margin: 0,
+                    fontSize: 11
+                });
+            }
+            
+            //- JsBarcode(".barcode", code, {
+            //-     width: 0.9,
+            //-     height: 14,
+            //-     textAlign: "center",
+            //-     fontOptions: "bold",
+            //-     padding: 0,
+            //-     margin: 0,
+            //-     fontSize: 13
+            //- });
+
+            let barcodeSVGs = document.getElementsByClassName("barcode");
+            // html2canvas
+            const barcodeSelector = document.querySelector("#barcode-selector");
+            //- html2canvas(barcodeSelector).then(canvas => {
+            //-     document.body.appendChild(canvas)
+            //- });
+            //- html2canvas(barcodeSelector, {
+            //-     onrendered: function(canvas) {
+            //-         var canvasImg = canvas.toDataURL("image/jpg");
+            //-         console.log("canvasImg ", canvasImg);
+            //-         $('#hidden-barcode').html('<img src="'+canvasImg+'" alt="">');
+            //-     }
+            //- });
+            //- html2canvas(barcodeSelector, {
+            //-     width: 100,
+            //-     height: 50
+            //- }).then(function(canvas) {
+            //-     var a = document.createElement('a');
+            //-     a.href = canvas.toDataURL("image/png");
+            //-     a.download = 'myfile.png';
+            //-     a.click();
+            //- });
+
+            // for (let el of barcodeSVGs) {
+            //   el.setAttribute("width", "100%")
+            //   el.setAttribute("height", "100%")
+            // }
+
+            $(".canvas").click(function() {
+                console.log("Canvas Click");
+                // PRINT
+                var printContent = document.getElementById("hidden-barcode");
+                var printWindow = window.open("", "","left=50,top=50");
+                printWindow.document.write(printContent.innerHTML);
+                printWindow.document.write("<script src=\'http://code.jquery.com/jquery-1.10.1.min.js\'><\/script>");
+                printWindow.document.write("<script>$(window).load(function(){ print(); close(); });<\/script>");
+                printWindow.document.close();
+            })
+
+            $(".printBarcode").click(function() {
+                let printableElement = document.getElementById("papa")
+                //- var mywindow = window.open('', 'PRINT', 'height=50px,width=100px');
+                var mywindow = window.open('', 'PRINT');
+                //- mywindow.document.write('<table class="barcode" style="width: 140px;margin-left: 7rem;"><thead></thead><tbody style="margin: 0; font-size: 9px; font-weight: bold;"><tr><td style="padding: 0 0 0 0; text-align: center">'+wgt_gm+' G</td><td style="padding: 0 0 0 30px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td style="padding: 0 0 0 0; text-align: center">DC '+dc+'</td><td style="padding: 0 0 0 30px; text-align: center">'+price+'MMK</td</tr></tbody></table>')
+                //- mywindow.document.write('<table class="barcode" style="width: 200px;margin-left: 5rem;"><thead></thead><tbody style="margin: 0; font-size: 18px; font-weight: bold;"><tr><td style="padding: 0 0 0 0; text-align: center">'+wgt_gm+' G</td><td style="padding: 0 0 0 55px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td style="padding: 0 0 0 0; text-align: center">DC '+dc+'</td><td style="padding: 0 0 0 55px; text-align: center; font-size: 14px;">'+price+'MMK</td</tr></tbody></table>')
+                // Can Scan Barcode
+                //- mywindow.document.write('<table class="barcode" style="width: 201px;margin-left: 5rem;"><thead></thead><tbody style="margin: 0; font-weight: bold;"><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">'+wgt_gm+' G</td><td style="padding: 0 0 0 28px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">DC '+dc+'</td><td style="padding: 0 0 0 28px; text-align: center; font-size: 14px;">'+price+'MMK</td</tr></tbody></table>')
+                if (type == "diamond") {
+                    //- mywindow.document.write('<table class="barcode" style="width: 205px;margin-left: 5rem;"><thead></thead><tbody style="margin: 0; font-weight: bold;"><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">'+wgt_gm+' G</td><td style="padding: 0 0 0 28px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">DC '+dc+'</td><td style="padding: 0 0 0 28px; text-align: center; font-size: 14px;">'+price+'MMK</td</tr></tbody></table>')
+                    mywindow.document.write('<table class="barcode" style="width: 225px;margin-left: 4rem;"><thead></thead><tbody style="margin: 0; font-weight: bold;"><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">'+wgt_gm+' G</td><td style="padding: 0 0 0 18px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td style="padding: 0 0 0 0; font-size: 1၇px; text-align: center">DC '+dc+'</td><td style="padding: 0 0 0 18px; text-align: center; font-size: 14px;">'+price+'MMK</td</tr></tbody></table>')
+                } else if (type == "gold") {
+                    mywindow.document.write('<table class="barcode" style="width: 225px;margin-left: 4rem;"><thead></thead><tbody style="margin: 0; font-weight: bold;"><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">'+wgt_k+'-'+wgt_p+'-'+wgt_y+'</td><td style="padding: 0 0 0 18px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td></td><td style="padding: 0 0 0 18px; text-align: center; font-size: 14px;">'+price+'MMK</td</tr></tbody></table>')
+                } else if (type == "pt") {
+                    mywindow.document.write('<table class="barcode" style="width: 205px;margin-left: 5rem;"><thead></thead><tbody style="margin: 0; font-weight: bold;"><tr><td style="padding: 0 0 0 0; font-size: 18px; text-align: center">'+wgt_gm+' G</td><td style="padding: 0 0 0 28px; text-align: center">'+printableElement.innerHTML+'</td</tr><tr><td></td><td style="padding: 0 0 0 28px; text-align: center; font-size: 14px;">'+price+'MMK</td</tr></tbody></table>')
+                }
+                
+                //- mywindow.document.write('<table class="barcode" style="width: 100px;"><thead></thead><tbody><tr><td style="padding-left: 50px;">'+printableElement.innerHTML+'</td></tr></tbody></table>')
+
+                //- mywindow.document.write('<html><head><title>Hello World</title>');
+                //- mywindow.document.write('</head><body >');
+                //- mywindow.document.write('<h1>Hello World</h1>');
+                //- mywindow.document.write(printableElement.innerHTML);
+                //- mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                //- mywindow.close();
+
+                //- return true;
+            })
+
+            //- $(".printBarcode").click(function() {
+            //-     let printFrame = document.createElement("iframe")
+            //-     let printableElement = document.getElementById("papa")
+            //-     printFrame.setAttribute("id", "printjs")
+            //-     //- printFrame.srcdoc = "<html><body style='margin: 0; width: 200px; height: 100px;'>" +
+            //-     //- printableElement.outerHTML + "<style>#printable { margin: 0; width: 1.6cm; height: 0.1cm; }</style> </body></html>"
+            //-     printFrame.srcdoc = "<div>" + printableElement.outerHTML + "</div>";
+
+            //-     document.body.appendChild(printFrame)
+
+            //-     //- let iframeElement = document.getElementById("printjs")
+            //-     //- iframeElement.onload = function(){
+            //-     //-     //- iframeElement.style.height = iframeElement.contentWindow.document.body.scrollHeight + 'px';
+            //-     //-     iframeElement.style.height = '100cm';
+            //-     //- }
+            //-     //- iframeElement.focus()
+            //-     //- iframeElement.contentWindow.print()
+            //-     document.getElementById("printjs").contentWindow.print();
+            //- });
+
+        //- $(".printBarcode").click(function() {
+        //-     var tscObj = getConnection();
+
+        //-     //tscObj.ActiveXabout();                                                    // Printer information
+
+        //-     tscObj.ActiveXopenport ("TSC TTP-244 Pro");                                 // Printer name, can not be wrong
+
+        //-     //- tscObj.ActiveXdownloadpcx("C:/Users/HP/Documents/nwt/tsc-ttp-pro/public/images/test.pcx","test.pcx");
+
+        //-     tscObj.ActiveXsetup("70","40","4","15","0","2.5","0");                      // Printer Setting()
+
+        //-     // tscObj.ActiveXsetup("label width", "tag height", "printing speed", "printing density (0-15)", "sensor category string type, 0 means using vertical spacing sensor (gap sensor) ), 1 means black mark senso, "Gap/Black mark vertical pitch (mm)", "Gap/Black mark offset distance (mm)");
+        //-     // tscObj.ActiveXformfeed();
+        //-     // tscObj.ActiveXnobackfeed();
+
+        //-     tscObj.ActiveXsendcommand("DIRECTION 1");                                    // Set the label direction, DIRECTION 1 upper left corner (x,y)={0,0}; DIRECTION 0 bottom right corner (x,y)={0,0};
+        //-     tscObj.ActiveXsendcommand ("SET TEAR ON");
+        //-     tscObj.ActiveXclearbuffer();
+
+        //-     /*
+        //-     1. ActiveXprinterfont uses the built-in code of the machine is usually used to play English.
+        //-     2. ActiveXwindowsfont can output Chinese characters, but must be the fonts that exist in the system.
+
+        //-     TSCObj.ActiveXprinterfont ("a","b","c","d","e","f","g");
+        //-     -----------------------------------------------------------------------------
+        //-     a: string, the starting point of the text X direction, expressed in dots.
+        //-     b: String, the starting point of the text Y direction, expressed in dots.
+        //-     c: Built-in font name, a total of 12 kinds (1: 8*12 dots 2: 12*20 dots 3: 16*24 dots 4: 24*32 dots 5: 32*48 dots TST24.BF2: Traditional Chinese 24* 24 TST16.BF2: Traditional Chinese 16*16 TTT24.BF2: Traditional Chinese 24*24 (Telecom Code) TSS24.BF2: Simplified Chinese 24*24 TSS16.BF2: Simplified Chinese 16*16 K: Korean 24*24 L: Korean 16*16 )
+        //-     d: string, rotation angle
+        //-     e: string, X direction magnification 1-8
+        //-     f: string, Y direction magnification 1-8
+        //-     g: string, print content
+
+        //-     ActiveXwindowsfont(a,b,c,d,e,f,g,h);
+        //-     -----------------------------------------------------------------------------
+        //-     a: integer type, the starting point of the text X direction, expressed in dots.
+        //-     b: integer type, the starting point of the text Y direction, expressed in dots.
+        //-     c: integer type, font height, expressed in dots.
+        //-     d: integer type, rotation angle, counterclockwise rotation. 0-rotation 0°, 90-rotation 90°, 180-rotation 180°, 270-rotation 270°.
+        //-     e: integer type, font shape. 0: label; 1: italic; 2: bold; 3: bold italic.
+        //-     f: integer type, underline, 0: no underscore; 1: underlined.
+        //-     g: string type, font name. Such as: Arial, Times new Roman.
+        //-     h: String type, print text content.
+        //-     */
+
+        //-     tscObj.ActiveXwindowsfont(60, 50, 54, 0, 2, 0, "Angsana New", barcode_name);
+        //-     tscObj.ActiveXprintlabel ("1","1");                                                // (number of copies, number of sheets per page)
+        //-     tscObj.ActiveXclearbuffer();                                                          // Clear buffer
+        //-     tscObj.ActiveXcloseport ();                                                           // Close the print port
+        //- });
+
+        //- function getConnection() {
+        //-     return new COM("TSCActiveX.TSCLIB");
+        //-     //- return new COM("TSCActiveX.TSCLIB") or die("Unable to open COM object");
+        //- }
+
+        /* Resource:
+            https://github.com/leesaw/pradit/blob/b91513e3978e75610a0bbd06cfa4751fb3702f16/tsc/printbarcode.php
+            https://topic.alibabacloud.com/a/java-calls-the-tsc-font-colorredprinterfont-for-printing_1_27_30242239.html
+        */
+        });

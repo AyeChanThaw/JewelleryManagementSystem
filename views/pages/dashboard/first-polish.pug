@@ -1,0 +1,77 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm First Polish
+  h1.page-header-mm First Polish
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th.mm ရက်စွဲ
+          th.mm အရောင်တင်
+          th Code
+          th.mm ပေးထည်
+          th.mm အပ်ထည်
+          th.mm အလျော့
+          th.actions-2
+            a.btn.btn-success.list-action-text(href="./first-polish/entry", role="button", title="Add")
+              i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-first-polish').addClass('active');
+      $('div#production_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": { 
+            "url": "/api/first_polish?columns=first_polish.*,polisher.name@polisher_name,goldsmith_code.code@goldsmith_code&join=left,polisher,polisher_id,eq,polisher.id&join=left,goldsmith_code,goldsmith_code_id,eq,goldsmith_code.id&filter=is_entry,eq,0",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "first_polish"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "date" },
+              { "data": "polisher_name" },
+              { "data": "goldsmith_code" },
+              { "data": "pay_wgt_gm" },
+              { "data": "wgt_gm" },
+              { "data": "reduce_wgt_gm" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 7, orderable: false, render: dataTableIsFinishActionsRenderer("./first-polish/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/first-polish/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

@@ -1,0 +1,382 @@
+body {
+  font-size: .875rem;
+}
+
+
+/*
+ * Sidebar
+ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  /* Behind the navbar */
+  padding: 48px 0 0;
+  /* Height of navbar */
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: 0.25rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /*Scrollable contents if viewport is shorter than content. */
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+  .sidebar-sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+.sidebar-heading {
+  position: relative;
+  font-size: .75rem;
+  padding: .75em 1em;
+  margin-bottom: 0em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.sidebar ul {
+  float: left;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.sidebar li {
+  position: relative;
+  display: block;
+  float: left;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.sidebar li.nav-group-item {
+  border-bottom: 0;
+}
+
+.sidebar li.active a {
+  color: #fff;
+  /* background-color: #337ab7; */
+  background-color: #ED1C24;
+}
+
+.sidebar li>a {
+  position: relative;
+  display: block;
+  padding: 15px 15px;
+  line-height: 20px;
+  color: #777;
+  text-decoration: none;
+}
+
+.sidebar li>a.sidebar-heading {
+  padding: 15px 0 8px 15px;
+}
+
+.sidebar a .fa {
+  /* margin: 0 16px 0 4px; */
+  font-size: 1.25rem;
+  margin-right: 16px;
+  width: 18px;
+}
+
+.sidebar a .fab {
+  /* margin: 0 16px 0 4px; */
+  font-size: 1.25rem;
+  margin-right: 16px;
+  width: 18px;
+}
+
+a.sidebar-heading .fa {
+  margin-top: -4px;
+}
+
+a.sidebar-heading h6 {
+  font-size: 100%;
+}
+
+.sidebar .sidebar-group>ul {
+  background-color: #f3f3f3;
+  border-right: 1px solid #e7e7e7;
+}
+
+.nav-item.dropdown .nav-link {
+  padding: .5em 1em;
+}
+
+.bg-blue {
+  background-color: #3F63A3;
+}
+
+
+/*
+ * Content
+ */
+
+[role="main"] {
+  padding-top: 60px;
+  /* Space for fixed navbar */
+}
+
+@media (max-width: 720px) {
+  .navbar-toggler {
+    border: 0;
+    padding: .1em;
+  }
+  .sidebar {
+    width: 250px;
+  }
+  .sidebar-show {
+    animation: slidein .5s 1;
+    -webkit-animation: slidein .5s 1;
+  }
+  .sidebar-hide {
+    animation: slideout .5s 1;
+    -webkit-animation: slideout .5s 1;
+    left: -300px;
+  }
+  .dropdown-menu-right {
+    position: absolute !important;
+    right: 0;
+    left: auto;
+  }
+}
+
+/* 
+  Button 
+*/
+
+.success-excel {
+  background: #1e7e34 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 22px !important;
+  font-weight: bold !important;
+  border-radius: 5px !important;
+  font-size: 1.1em !important;
+}
+
+.success-import {
+  background: #17a2b8 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 22px !important;
+  font-weight: bold !important;
+  border-radius: 5px !important;
+  font-size: 1.1em !important;
+}
+
+.sample-btn {
+  width: 125px;
+  height: 35px;
+  background-color: #ffc107;
+  padding-top: 5px;
+  padding-left: 17px;
+  border-radius: 7px;
+}
+
+.sample-btn a:visited a:hover {
+  color: white;
+}
+
+.sample-btn a {
+  text-decoration: none;
+  color: white;
+}
+
+
+/*
+ * Navbar
+ */
+
+.navbar-brand {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 1rem;
+  color: #fff !important;
+  /* box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25); */
+}
+
+.navbar .form-control {
+  padding: .75rem 1rem;
+  border-width: 0;
+  border-radius: 0;
+}
+
+.navbar-nav i {
+  font-size: 1.6rem;
+  color: white;
+  padding-top: 4px;
+}
+
+.navbar-nav span {
+  padding-top: 5px;
+  color: white;
+}
+
+nav.navbar {
+  position: fixed;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  top: 0;
+  left: 0;
+  right: 0;
+  border: none;
+  border-radius: 0;
+  -webkit-box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12) !important;
+}
+
+.form-control-dark {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .1);
+}
+
+.form-control-dark:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+
+/* Slide in animation */
+
+@-moz-keyframes slidein {
+  0% {
+    left: -300px;
+  }
+  100% {
+    left: 0px;
+  }
+}
+
+@-webkit-keyframes slidein {
+  0% {
+    left: -300px;
+  }
+  100% {
+    left: 0px;
+  }
+}
+
+@keyframes slidein {
+  0% {
+    left: -300px;
+  }
+  100% {
+    left: 0px;
+  }
+}
+
+@-moz-keyframes slideout {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: -300px;
+  }
+}
+
+@-webkit-keyframes slideout {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: -300px;
+  }
+}
+
+@keyframes slideout {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: -300px;
+  }
+}
+
+
+/*
+ * Main content
+ */
+
+.main {
+  padding: 20px;
+}
+
+@media (min-width: 768px) {
+  .main {
+    margin-left: 10px;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}
+
+.main .page-header {
+  margin-top: 0;
+}
+
+.page-header-mm {
+  padding-bottom: 10px;
+}
+
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.placeholders h4 {
+  margin-bottom: 0;
+}
+
+.placeholder {
+  margin-bottom: 20px;
+}
+
+.placeholder img {
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.placeholder-box {
+  padding-bottom: 20px;
+  border-radius: 5px;
+  border: 2px solid #e7e7e7;
+}
+
+.placeholder-box>a {
+  padding-bottom: 10px !important;
+}
+
+/*
+ * dashboard
+ */
+
+ .dash-cat {
+  color: #555;
+  text-decoration: none;
+}
+
+.dash-cat:hover {
+  color: #888;
+  text-decoration: none;
+}

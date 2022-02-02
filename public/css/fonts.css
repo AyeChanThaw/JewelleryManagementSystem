@@ -1,0 +1,80 @@
+
+
+@font-face {
+    font-family: 'Myanmar Text';
+    font-weight: 400;
+    font-style: normal;
+    src: local('Myanmar Text'), local('MyanmarText');
+    src: url('../fonts/MyanmarText.eot?#iefix') format('embedded-opentype'),  
+        url('../fonts/MyanmarText.woff') format('woff'), 
+        url('../fonts/MyanmarText.ttf')  format('truetype'), 
+        url('../fonts/MyanmarText.svg#MyanmarText') format('svg');
+  }
+  
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 400;
+    src: local('Noto Sans Italic'), local('NotoSans-Italic');
+    src: url('../fonts/NotoSans-Italic.eot?#iefix') format('embedded-opentype'),  
+        url('../fonts/NotoSans-Italic.woff') format('woff'), 
+        url('../fonts/NotoSans-Italic.ttf')  format('truetype'), 
+        url('../fonts/NotoSans-Italic.svg#NotoSans-Italic') format('svg');
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 700;
+    src: local('Noto Sans Bold Italic'), local('NotoSans-BoldItalic');
+    src: url('../fonts/NotoSans-BoldItalic.eot?#iefix') format('embedded-opentype'),  
+        url('../fonts/NotoSans-BoldItalic.woff') format('woff'), 
+        url('../fonts/NotoSans-BoldItalic.ttf')  format('truetype'), 
+        url('../fonts/NotoSans-BoldItalic.svg#NotoSans-BoldItalic') format('svg');
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Noto Sans'), local('NotoSans');
+    src: url('../fonts/NotoSans-Regular.eot?#iefix') format('embedded-opentype'),  
+        url('../fonts/NotoSans-Regular.woff') format('woff'), 
+        url('../fonts/NotoSans-Regular.ttf')  format('truetype'), 
+        url('../fonts/NotoSans-Regular.svg#NotoSans-Regular') format('svg');
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Noto Sans Bold'), local('NotoSans-Bold');
+    src: url('../fonts/NotoSans-Bold.eot?#iefix') format('embedded-opentype'),  
+        url('../fonts/NotoSans-Bold.woff') format('woff'), 
+        url('../fonts/NotoSans-Bold.ttf')  format('truetype'), 
+        url('../fonts/NotoSans-Bold.svg#NotoSans-Bold') format('svg');
+  }
+  
+  /* myanmar */
+  @font-face {
+    font-family: 'Noto Sans';
+    font-weight: 700;
+    font-style: normal;
+    src: local('Noto Sans Myanmar Bold'), local('NotoSans-Bold');
+    src: url('../fonts/NotoSansMyanmar-Bold.ttf');
+    src: url('../fonts/NotoSansMyanmar-Bold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/NotoSansMyanmar-Bold.woff') format('woff'),
+        url('../fonts/NotoSansMyanmar-Bold.ttf') format('truetype'),
+        url('../fonts/NotoSansMyanmar-Bold.svg') format('svg');
+    unicode-range: "U+1000-109F, U+200C-200D, U+25CC";
+  }
+  
+  @font-face {
+    font-family: 'Noto Sans';
+    font-weight: 400;
+    font-style: normal;
+    src: local('Noto Sans Myanmar'), local('NotoSans');
+    src: url('../fonts/NotoSansMyanmar-Regular.ttf');
+    src: url('../fonts/NotoSansMyanmar-Regular.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/NotoSansMyanmar-Regular.woff') format('woff'),
+        url('../fonts/NotoSansMyanmar-Regular.ttf') format('truetype'),
+        url('../fonts/NotoSansMyanmar-Regular.svg') format('svg');
+    unicode-range: "U+1000-109F, U+200C-200D, U+25CC";
+  }

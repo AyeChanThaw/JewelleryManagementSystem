@@ -1,0 +1,74 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm စိန်အဝယ်(ကြွေး)
+  h1.page-header.mm စိန်အဝယ်(ကြွေး)
+  include ../../includes/delete-confirm
+  div.table-responsive
+    table#list.table.table-striped
+      thead
+        tr
+          th #
+          th နေ့စွဲ
+          th ဘောင်ချာနံပါတ်
+          th အသားတင်ကျသင့်ငွေ
+          th လက်ကျန်ငွေ
+          th.actions-2 Action
+            
+            //- a.btn.btn-success.list-action-text(href="./sale-credit/sale-credit-entry", role="button", title="Add")
+            //-   i.fa.fa-plus
+      tbody
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-wholediamond-credit').addClass('active');
+      $('div#purchase_subitems').addClass('show');
+
+      $.fn.dataTable.ext.errMode = 'none';
+      var table = $('table#list').on('error.dt', function(e, settings, techNote, message) {
+          console.log('DataTables Error: ', message);
+          alert('Read data error!');
+        }).DataTable({
+          "autoWidth": true,
+          "ajax": {
+            "url": "/api/whole_diamond_credit?columns=whole_diamond_credit.date,whole_diamond.voc_no,whole_diamond.netprice,whole_diamond.debtprice&join=left,whole_diamond,whole_diamond_id,eq,whole_diamond.id",
+            "headers": {"authorization": "Bearer " + token},
+            "dataSrc": "data"
+          },
+          "columns": [
+              { "data": "id" },
+              { "data": "date" },
+              { "data": "voc_no" },
+              { "data": "netprice" },
+              { "data": "debtprice" },
+              { "data": "actions", "className": "nowrap" }
+          ],
+          "columnDefs": [
+            { targets: 0, render: dataTableIndexRenderer() },
+            { targets: 1, render: dataTableDateRenderer() },
+            { targets: 3, render: dataTableNetPriceWithCommas() },
+            { targets: 4, render: dataTableDebtPriceWithCommas() },
+            { targets: 5, orderable: false, render: dataTableActionsRenderer("./wholediamond-credit/edit", "#{permission.access}") }
+          ]
+      });
+
+      $('#dialogDeleteConfirm').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        $(this).attr('data-id', id);
+        $(this).find('#dialogAccept').on('click', function(ev) {
+          var deleteUrl = '/wholediamond-credit/delete/' + id;
+          doDelete(deleteUrl, token, function() {
+            table.ajax.reload();
+          });
+        });
+      }).on('hide.bs.modal', function (event) {
+        $(this).attr('data-id', '');
+        $(this).find('#dialogAccept').off('click');
+      });
+    });

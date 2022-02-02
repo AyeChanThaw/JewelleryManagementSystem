@@ -1,0 +1,172 @@
+extends ../../includes/layout-dashboard
+
+block content
+  ol.breadcrumb
+    li.breadcrumb-item
+      a(href="/dashboard") Home
+    li.breadcrumb-item.active
+      span.mm ပြန်သွင်းထည်
+  h1.page-header.mm ပြန်သွင်းထည်
+
+  div.row.from-wrapper
+    div.alert.alert-dismissible#alert(role='alert')
+      strong.alert-title#alertTitle
+      span#alertMessage
+      button.close(type='button', data-hide='alert', aria-label='Close')
+        span(aria-hidden='true') &times;
+
+    form.form-horizontal#entryForm(method='post', action=`${postUrl}`)
+      div.form-group.row
+          label.col-sm-2.control-label(for='startdate') From Date
+          div.col-sm-10
+            input.form-control.fromdate#start.mm(type='text', name='start', required)
+
+      div.form-group.row
+        label.col-sm-2.control-label(for='enddate') To Date
+        div.col-sm-10
+          input.form-control.todate#end.mm(type='text', name='end', required)
+
+      div.row.justify-content-center.form-actions
+        button.btn.btn-primary#loadBtn(type='button', role='button') Load
+
+      div.card
+        div.card-body
+          h3.card-title.mm ပစ္စည်းစာရင်း
+          div.form-group.row#tblgen()
+            div.table-responsive.col-md-12
+              table#list.table.table-bordered
+                thead
+                    tr
+                        th.mm(scope='col') Code
+                        th.mm(scope='col') အလေးချိန် gm
+                        th.mm(scope='col') ကျပ်
+                        th.mm(scope='col') ပဲ
+                        th.mm(scope='col') ရွေး
+                        th.mm(scope='col') တန်ဖိုး
+                        th.mm(scope='col') Select All
+                          input#select_all(type="checkbox", name="select_all", checked=(params.selectall == 1))
+                tbody#tbody
+                  input#item_array(type='hidden', name='item_array', value=item_array)
+                  //- tr
+                  //-   td
+                  //-   td
+                  //-   td
+                  //-   td
+                  //-   td
+                  //-   td
+                  //-   td
+                      //- <input class='check' type='checkbox' id='vehicle1' name='vehicle1' value='Bike'>
+                      //- <label> Check </label>
+
+      div.row.justify-content-md-center.form-actions
+        button.btn.btn-primary#submitBtn(type='submit', role='button') Save
+        a.btn.btn-secondary#actionCancel(href=listUrl, role='button') Cancel
+
+  script.
+    $(document).ready(function() {
+      var token = "!{token}";
+      var diamond_data ;
+      $('div.sidebar-sticky li.nav-item').removeClass('active');
+      $('li#menu-return-items-production').addClass('active');
+      $('div#returnshowroom_subitems').addClass('show');
+      var access = ("#{permission.access}").split(",");
+      if (access[1] != "1") $("#adder").hide();
+
+      $.fn.dataTable.ext.errMode = 'none';
+
+      let current = new Date();
+      let month = current.getMonth() + 1;
+      const year = current.getFullYear();
+      let day = current.getDate();
+      if (month < 10)
+        month = "0" + month;
+      if (day < 10)
+        day = "0" + day;
+
+      const showcurrent = day + "/" + month + "/" + year;
+      const showstart = "01/" + month + "/" + year;
+      $("#start").val(showstart);
+      $("#end").val(showcurrent);
+      reload(showstart, showcurrent);
+
+      $("#loadBtn").on('click', function(event){
+        reload($("#start").val(), $("#end").val(), $("#sale_person_id").val());
+      });
+
+      var item = 1;
+      function reload(start, end) {
+        $.ajax({
+            url: "/api/itemview/getReturnItemByDate?start="+start+"&end="+end,
+            headers: {"authorization": "Bearer " + token},
+            success: function(result) {
+                $("#tbody").empty();
+                let markup = "";
+                result.data.forEach((item) => {
+                    markup += "<tr><td style='display:none;'><input type='hidden' name='item_id' value="+item.id+"></td><td>"+ item.code +"</td><td>" + item.wgt_gm + "</td><td>" + item.wgt_k + "</td><td>" + item.wgt_p + "</td><td>" + item.wgt_y + "</td><td>" + item.price + "</td><td><input class='check' type='checkbox' name='check_"+item.id+"' aria-label='chkDelete'><label>Check</label></td></tr>";
+                })
+                tablebody = $("#list #tbody");
+                tablebody.append(markup);
+            }
+        });
+      }
+
+      $('#select_all').change(function() {
+        //- const items = JSON.parse($("#items").val());
+        //- const item_array = JSON.parse($("#item_array").val());
+        if(this.checked) {
+          var clicked = true;
+          $(".check").prop("checked", clicked);
+        } else {
+          var clicked = false;
+          $(".check").prop("checked", clicked);
+        }
+      });
+
+      $(".check").change(function() {
+        console.log("check class");
+        if(!this.checked) {
+          consol.log("not check");
+          $("#select_all").prop("checked", false);
+        }
+      })
+
+      $("#alert").hide();
+      $('#entryForm').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr("action"),
+          type: $(this).attr("method"),
+          data: $(this).formSerialize(),
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          processData: false,
+          success: function(data) {
+            console.log("data ", data);
+            if (data.success) {
+              $("#alertTitle").html("Success");
+              $("#alertMessage").html("Save Success!");
+              $("#alert").addClass("alert-success").show();
+
+              var postFrm = $('#postSuccessForm');
+              var params = $.url(postFrm.attr('action')).param();
+              if (!params) {
+                for(var key in params) {
+                  postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+                }
+              }
+              window.setTimeout(function(){
+                postFrm.submit();
+              }, 2 * 1000);
+              console.log("shwostart ", showstart);
+              $("#start").val(showstart);
+              $("#end").val(showcurrent);
+              reload(showstart, showcurrent);
+            } else {
+              $("#alertTitle").html("Error");
+              $("#alertMessage").html("Error on save!");
+              $("#alert").addClass("alert-danger").show();
+            }
+          }
+        });
+      });
+
+    });

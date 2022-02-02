@@ -1,0 +1,66 @@
+div.modal.fade#dialogDeliverConfirm(tabindex='-1', role='dialog', aria-labelledby='deliverConfirm')
+  div.modal-dialog.modal-lg(role='document')
+    div.modal-content
+      form.form-detail#entryForm(method='post', action=`${postUrl}`)
+        input#id(type='hidden', name='id')
+        div.modal-header
+          h4.modal-title Deliver
+        div.modal-body        
+          div.form-group.row.delivery-form
+            label.col-sm-4.control-label.mm(for='description') အကြောင်းအရာ
+            div.col-sm-8
+              textarea.form-control.mm#description(name='description')
+              
+        div.modal-footer
+          button.btn.btn-secondary#dialogCancel(type='button', data-dismiss='modal') Close
+          button.btn.btn-primary#dialogAccept(type='submit', role='button', data-dismiss='modal') Save
+          //- button.btn.btn-primary#dialogAccept(type='button', data-dismiss='modal') Save
+      form#postSuccessForm(method='GET', action=listUrl)
+//- script.
+//-   $(document).ready(function() {
+//-     var token = "!{token}";
+//-     console.log("token ", token);
+//-     $('#dialogDeliverConfirm').on('show.bs.modal', function (event) {
+//-         var button = $(event.relatedTarget);
+//-         var id = button.data('id');
+//-         $("#id").val(id);
+//-         console.log("id ", id);
+//-         //- var saleId = $('#saleid').val();
+//-         //- console.log("saleId in 1 ", saleId);
+//-         $(this).attr('data-id', id);
+//-         $(this).find('#dialogAccept').on('click', function(ev) {
+//-           var postUrl = '/sale-diamond/deliver/' + id;
+//-           doSave(postUrl, token, $('#entryForm').serialize(), function() {
+//-             console.log("do save success");
+//-             table.ajax.reload();
+//-           });
+//-         });
+//-       }).on('hide.bs.modal', function (event) {
+//-         $(this).attr('data-id', '');
+//-         $(this).find('#dialogAccept').off('click');
+//-       });
+//-     //- $('#entryForm').ajaxForm({
+//-     //-   url: `/order/details/fc253865-5500-4b88-a57d-715739e78a4a`, //this is the submit URL
+//-     //-   type: 'POST', //or POST
+//-     //-   data: $('#entryForm').serialize(),
+//-     //-   success: function(data) {
+//-     //-     if (data.success) {
+//-     //-       var postFrm = $('#postSuccessForm');
+//-     //-       var params = $.url(postFrm.attr('action')).param();
+//-     //-       console.log("params ", params);
+//-     //-       if (!params) {
+//-     //-         for(var key in params) {
+//-     //-           postFrm.append($('<input type="hidden" name="'+key+'" value="'+ params[key] +'" />'));
+//-     //-         }
+//-     //-       }
+//-     //-       window.setTimeout(function(){
+//-     //-         postFrm.submit();
+//-     //-       }, 2 * 1000);
+//-     //-     } else {
+//-     //-       $("#alertTitle").html("Error");
+//-     //-       $("#alertMessage").html("Error on save!");
+//-     //-       $("#alert").addClass("alert-danger").show();
+//-     //-     }
+//-     //-   }
+//-     //- });
+//-   });
